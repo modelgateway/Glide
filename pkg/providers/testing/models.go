@@ -4,10 +4,8 @@ import (
 	"time"
 
 	"github.com/EinStack/glide/pkg/config/fields"
-
+	"github.com/EinStack/glide/pkg/models"
 	"github.com/EinStack/glide/pkg/routers/latency"
-
-	"github.com/EinStack/glide/pkg/providers"
 )
 
 // LangModelMock
@@ -55,6 +53,6 @@ func (m LangModelMock) Weight() int {
 	return m.weight
 }
 
-func ChatMockLatency(model providers.Model) *latency.MovingAverage {
+func ChatMockLatency(model models.Model) *latency.MovingAverage {
 	return model.(LangModelMock).chatLatency
 }

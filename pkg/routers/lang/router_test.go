@@ -12,7 +12,6 @@ import (
 	"github.com/EinStack/glide/pkg/resiliency/retry"
 
 	"github.com/EinStack/glide/pkg/api/schemas"
-	"github.com/EinStack/glide/pkg/providers"
 	ptesting "github.com/EinStack/glide/pkg/providers/testing"
 	"github.com/EinStack/glide/pkg/routers/latency"
 	"github.com/EinStack/glide/pkg/routers/routing"
@@ -41,16 +40,15 @@ func TestLangRouter_Chat_PickFistHealthy(t *testing.T) {
 		),
 	}
 
-	models := make([]providers.Model, 0, len(langModels))
+	modelPool := make([]models.Model, 0, len(langModels))
 	for _, model := range langModels {
-		models = append(models, model)
+		modelPool = append(modelPool, model)
 	}
 
-	router := LangRouter{
+	router := Router{
 		routerID:         "test_router",
-		Config:           &LangRouterConfig{},
 		retry:            retry.NewExpRetry(3, 2, 1*time.Second, nil),
-		chatRouting:      routing.NewPriority(models),
+		chatRouting:      routing.NewPriority(modelPool),
 		chatModels:       langModels,
 		chatStreamModels: langModels,
 		tel:              telemetry.NewTelemetryMock(),
@@ -95,19 +93,18 @@ func TestLangRouter_Chat_PickThirdHealthy(t *testing.T) {
 		),
 	}
 
-	models := make([]providers.Model, 0, len(langModels))
+	modelPool := make([]models.Model, 0, len(langModels))
 	for _, model := range langModels {
-		models = append(models, model)
+		modelPool = append(modelPool, model)
 	}
 
 	expectedModels := []string{"third", "third"}
 
-	router := LangRouter{
+	router := Router{
 		routerID:          "test_router",
-		Config:            &LangRouterConfig{},
 		retry:             retry.NewExpRetry(3, 2, 1*time.Second, nil),
-		chatRouting:       routing.NewPriority(models),
-		chatStreamRouting: routing.NewPriority(models),
+		chatRouting:       routing.NewPriority(modelPool),
+		chatStreamRouting: routing.NewPriority(modelPool),
 		chatModels:        langModels,
 		chatStreamModels:  langModels,
 		tel:               telemetry.NewTelemetryMock(),
@@ -146,17 +143,16 @@ func TestLangRouter_Chat_SuccessOnRetry(t *testing.T) {
 		),
 	}
 
-	models := make([]providers.Model, 0, len(langModels))
+	modelPool := make([]models.Model, 0, len(langModels))
 	for _, model := range langModels {
-		models = append(models, model)
+		modelPool = append(modelPool, model)
 	}
 
-	router := LangRouter{
+	router := Router{
 		routerID:          "test_router",
-		Config:            &LangRouterConfig{},
 		retry:             retry.NewExpRetry(3, 2, 1*time.Millisecond, nil),
-		chatRouting:       routing.NewPriority(models),
-		chatStreamRouting: routing.NewPriority(models),
+		chatRouting:       routing.NewPriority(modelPool),
+		chatStreamRouting: routing.NewPriority(modelPool),
 		chatModels:        langModels,
 		chatStreamModels:  langModels,
 		tel:               telemetry.NewTelemetryMock(),
@@ -190,19 +186,18 @@ func TestLangRouter_Chat_UnhealthyModelInThePool(t *testing.T) {
 		),
 	}
 
-	models := make([]providers.Model, 0, len(langModels))
+	modelPool := make([]models.Model, 0, len(langModels))
 	for _, model := range langModels {
-		models = append(models, model)
+		modelPool = append(modelPool, model)
 	}
 
-	router := LangRouter{
+	router := Router{
 		routerID:          "test_router",
-		Config:            &LangRouterConfig{},
 		retry:             retry.NewExpRetry(3, 2, 1*time.Millisecond, nil),
-		chatRouting:       routing.NewPriority(models),
+		chatRouting:       routing.NewPriority(modelPool),
 		chatModels:        langModels,
 		chatStreamModels:  langModels,
-		chatStreamRouting: routing.NewPriority(models),
+		chatStreamRouting: routing.NewPriority(modelPool),
 		tel:               telemetry.NewTelemetryMock(),
 		logger:            telemetry.NewLoggerMock(),
 	}
@@ -236,19 +231,18 @@ func TestLangRouter_Chat_AllModelsUnavailable(t *testing.T) {
 		),
 	}
 
-	models := make([]providers.Model, 0, len(langModels))
+	modelPool := make([]models.Model, 0, len(langModels))
 	for _, model := range langModels {
-		models = append(models, model)
+		modelPool = append(modelPool, model)
 	}
 
-	router := LangRouter{
+	router := Router{
 		routerID:          "test_router",
-		Config:            &LangRouterConfig{},
 		retry:             retry.NewExpRetry(1, 2, 1*time.Millisecond, nil),
-		chatRouting:       routing.NewPriority(models),
+		chatRouting:       routing.NewPriority(modelPool),
 		chatModels:        langModels,
 		chatStreamModels:  langModels,
-		chatStreamRouting: routing.NewPriority(models),
+		chatStreamRouting: routing.NewPriority(modelPool),
 		tel:               telemetry.NewTelemetryMock(),
 		logger:            telemetry.NewLoggerMock(),
 	}
@@ -293,18 +287,17 @@ func TestLangRouter_ChatStream(t *testing.T) {
 		),
 	}
 
-	models := make([]providers.Model, 0, len(langModels))
+	modelPool := make([]models.Model, 0, len(langModels))
 	for _, model := range langModels {
-		models = append(models, model)
+		modelPool = append(modelPool, model)
 	}
 
-	router := LangRouter{
+	router := Router{
 		routerID:          "test_stream_router",
-		Config:            &LangRouterConfig{},
 		retry:             retry.NewExpRetry(3, 2, 1*time.Second, nil),
-		chatRouting:       routing.NewPriority(models),
+		chatRouting:       routing.NewPriority(modelPool),
 		chatModels:        langModels,
-		chatStreamRouting: routing.NewPriority(models),
+		chatStreamRouting: routing.NewPriority(modelPool),
 		chatStreamModels:  langModels,
 		tel:               telemetry.NewTelemetryMock(),
 		logger:            telemetry.NewLoggerMock(),
@@ -363,18 +356,17 @@ func TestLangRouter_ChatStream_FailOnFirst(t *testing.T) {
 		),
 	}
 
-	models := make([]providers.Model, 0, len(langModels))
+	modelPool := make([]models.Model, 0, len(langModels))
 	for _, model := range langModels {
-		models = append(models, model)
+		modelPool = append(modelPool, model)
 	}
 
-	router := LangRouter{
+	router := Router{
 		routerID:          "test_stream_router",
-		Config:            &LangRouterConfig{},
 		retry:             retry.NewExpRetry(3, 2, 1*time.Second, nil),
-		chatRouting:       routing.NewPriority(models),
+		chatRouting:       routing.NewPriority(modelPool),
 		chatModels:        langModels,
-		chatStreamRouting: routing.NewPriority(models),
+		chatStreamRouting: routing.NewPriority(modelPool),
 		chatStreamModels:  langModels,
 		tel:               telemetry.NewTelemetryMock(),
 		logger:            telemetry.NewLoggerMock(),
@@ -433,19 +425,18 @@ func TestLangRouter_ChatStream_AllModelsUnavailable(t *testing.T) {
 		),
 	}
 
-	models := make([]providers.Model, 0, len(langModels))
+	modelPool := make([]models.Model, 0, len(langModels))
 	for _, model := range langModels {
-		models = append(models, model)
+		modelPool = append(modelPool, model)
 	}
 
-	router := LangRouter{
+	router := Router{
 		routerID:          "test_router",
-		Config:            &LangRouterConfig{},
 		retry:             retry.NewExpRetry(1, 2, 1*time.Millisecond, nil),
-		chatRouting:       routing.NewPriority(models),
+		chatRouting:       routing.NewPriority(modelPool),
 		chatModels:        langModels,
 		chatStreamModels:  langModels,
-		chatStreamRouting: routing.NewPriority(models),
+		chatStreamRouting: routing.NewPriority(modelPool),
 		tel:               telemetry.NewTelemetryMock(),
 		logger:            telemetry.NewLoggerMock(),
 	}

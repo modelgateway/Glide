@@ -4,70 +4,59 @@ import (
 	"testing"
 
 	"github.com/EinStack/glide/pkg/clients"
-	"github.com/EinStack/glide/pkg/providers/cohere"
-	"github.com/EinStack/glide/pkg/resiliency/health"
-	"github.com/EinStack/glide/pkg/resiliency/retry"
-	routers2 "github.com/EinStack/glide/pkg/routers"
-	"github.com/EinStack/glide/pkg/telemetry"
-
-	"github.com/EinStack/glide/pkg/routers/routing"
-
-	"github.com/EinStack/glide/pkg/routers/latency"
-
-	"github.com/EinStack/glide/pkg/providers/openai"
-
 	"github.com/EinStack/glide/pkg/providers"
-
+	"github.com/EinStack/glide/pkg/providers/cohere"
+	"github.com/EinStack/glide/pkg/providers/openai"
+	"github.com/EinStack/glide/pkg/resiliency/health"
+	"github.com/EinStack/glide/pkg/routers/latency"
+	"github.com/EinStack/glide/pkg/routers/routing"
+	"github.com/EinStack/glide/pkg/telemetry"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRouterConfig_BuildModels(t *testing.T) {
 	defaultParams := openai.DefaultParams()
 
-	cfg := routers2.Config{
-		LanguageRouters: []RouterConfig{
-			{
-				ID:              "first_router",
-				Enabled:         true,
-				RoutingStrategy: routing.Priority,
-				Retry:           retry.DefaultExpRetryConfig(),
-				Models: []providers.LangModelConfig{
-					{
-						ID:          "first_model",
-						Enabled:     true,
-						Client:      clients.DefaultClientConfig(),
-						ErrorBudget: health.DefaultErrorBudget(),
-						Latency:     latency.DefaultConfig(),
+	cfg := RoutersConfig{
+		*NewRouterConfig(
+			"first_router",
+			WithModels(ModelPoolConfig{
+				{
+					ID:          "first_model",
+					Enabled:     true,
+					Client:      clients.DefaultClientConfig(),
+					ErrorBudget: health.DefaultErrorBudget(),
+					Latency:     latency.DefaultConfig(),
+					Provider: providers.LangProviders{
 						OpenAI: &openai.Config{
 							APIKey:        "ABC",
 							DefaultParams: &defaultParams,
 						},
 					},
 				},
-			},
-			{
-				ID:              "second_router",
-				Enabled:         true,
-				RoutingStrategy: routing.LeastLatency,
-				Retry:           retry.DefaultExpRetryConfig(),
-				Models: []providers.LangModelConfig{
-					{
-						ID:          "first_model",
-						Enabled:     true,
-						Client:      clients.DefaultClientConfig(),
-						ErrorBudget: health.DefaultErrorBudget(),
-						Latency:     latency.DefaultConfig(),
+			}),
+		),
+		*NewRouterConfig(
+			"second_router",
+			WithModels(ModelPoolConfig{
+				{
+					ID:          "first_model",
+					Enabled:     true,
+					Client:      clients.DefaultClientConfig(),
+					ErrorBudget: health.DefaultErrorBudget(),
+					Latency:     latency.DefaultConfig(),
+					Provider: providers.LangProviders{
 						OpenAI: &openai.Config{
 							APIKey:        "ABC",
 							DefaultParams: &defaultParams,
 						},
 					},
 				},
-			},
-		},
+			}),
+		),
 	}
 
-	routers, err := cfg.BuildLangRouters(telemetry.NewTelemetryMock())
+	routers, err := cfg.Build(telemetry.NewTelemetryMock())
 
 	require.NoError(t, err)
 	require.Len(t, routers, 2)
@@ -82,21 +71,20 @@ func TestRouterConfig_BuildModelsPerType(t *testing.T) {
 	openAIParams := openai.DefaultParams()
 	cohereParams := cohere.DefaultParams()
 
-	cfg := LangRouterConfig{
-		ID:              "first_router",
-		Enabled:         true,
-		RoutingStrategy: routing.Priority,
-		Retry:           retry.DefaultExpRetryConfig(),
-		Models: []providers.LangModelConfig{
+	cfg := NewRouterConfig(
+		"first_router",
+		WithModels(ModelPoolConfig{
 			{
 				ID:          "first_model",
 				Enabled:     true,
 				Client:      clients.DefaultClientConfig(),
 				ErrorBudget: health.DefaultErrorBudget(),
 				Latency:     latency.DefaultConfig(),
-				OpenAI: &openai.Config{
-					APIKey:        "ABC",
-					DefaultParams: &openAIParams,
+				Provider: providers.LangProviders{
+					OpenAI: &openai.Config{
+						APIKey:        "ABC",
+						DefaultParams: &openAIParams,
+					},
 				},
 			},
 			{
@@ -105,13 +93,15 @@ func TestRouterConfig_BuildModelsPerType(t *testing.T) {
 				Client:      clients.DefaultClientConfig(),
 				ErrorBudget: health.DefaultErrorBudget(),
 				Latency:     latency.DefaultConfig(),
-				Cohere: &cohere.Config{
-					APIKey:        "ABC",
-					DefaultParams: &cohereParams,
+				Provider: providers.LangProviders{
+					Cohere: &cohere.Config{
+						APIKey:        "ABC",
+						DefaultParams: &cohereParams,
+					},
 				},
 			},
-		},
-	}
+		}),
+	)
 
 	chatModels, streamChatModels, err := cfg.BuildModels(tel)
 
@@ -125,108 +115,98 @@ func TestRouterConfig_InvalidSetups(t *testing.T) {
 
 	tests := []struct {
 		name   string
-		config routers2.Config
+		config RoutersConfig
 	}{
 		{
 			"duplicated router IDs",
-			routers2.Config{
-				LanguageRouters: []LangRouterConfig{
-					{
-						ID:              "first_router",
-						Enabled:         true,
-						RoutingStrategy: routing.Priority,
-						Retry:           retry.DefaultExpRetryConfig(),
-						Models: []providers.LangModelConfig{
-							{
-								ID:          "first_model",
-								Enabled:     true,
-								Client:      clients.DefaultClientConfig(),
-								ErrorBudget: health.DefaultErrorBudget(),
-								Latency:     latency.DefaultConfig(),
+			RoutersConfig{
+				*NewRouterConfig(
+					"first_router",
+					WithModels(ModelPoolConfig{
+						{
+							ID:          "first_model",
+							Enabled:     true,
+							Client:      clients.DefaultClientConfig(),
+							ErrorBudget: health.DefaultErrorBudget(),
+							Latency:     latency.DefaultConfig(),
+							Provider: providers.LangProviders{
 								OpenAI: &openai.Config{
 									APIKey:        "ABC",
 									DefaultParams: &defaultParams,
 								},
 							},
 						},
-					},
-					{
-						ID:              "first_router",
-						Enabled:         true,
-						RoutingStrategy: routing.LeastLatency,
-						Retry:           retry.DefaultExpRetryConfig(),
-						Models: []providers.LangModelConfig{
-							{
-								ID:          "first_model",
-								Enabled:     true,
-								Client:      clients.DefaultClientConfig(),
-								ErrorBudget: health.DefaultErrorBudget(),
-								Latency:     latency.DefaultConfig(),
+					}),
+				),
+				*NewRouterConfig(
+					"first_router",
+					WithModels(ModelPoolConfig{
+						{
+							ID:          "first_model",
+							Enabled:     true,
+							Client:      clients.DefaultClientConfig(),
+							ErrorBudget: health.DefaultErrorBudget(),
+							Latency:     latency.DefaultConfig(),
+							Provider: providers.LangProviders{
 								OpenAI: &openai.Config{
 									APIKey:        "ABC",
 									DefaultParams: &defaultParams,
 								},
 							},
 						},
-					},
-				},
+					}),
+				),
 			},
 		},
 		{
 			"duplicated model IDs",
-			routers2.Config{
-				LanguageRouters: []LangRouterConfig{
-					{
-						ID:              "first_router",
-						Enabled:         true,
-						RoutingStrategy: routing.Priority,
-						Retry:           retry.DefaultExpRetryConfig(),
-						Models: []providers.LangModelConfig{
-							{
-								ID:          "first_model",
-								Enabled:     true,
-								Client:      clients.DefaultClientConfig(),
-								ErrorBudget: health.DefaultErrorBudget(),
-								Latency:     latency.DefaultConfig(),
-								OpenAI: &openai.Config{
-									APIKey:        "ABC",
-									DefaultParams: &defaultParams,
-								},
-							},
-							{
-								ID:          "first_model",
-								Enabled:     true,
-								Client:      clients.DefaultClientConfig(),
-								ErrorBudget: health.DefaultErrorBudget(),
-								Latency:     latency.DefaultConfig(),
+			RoutersConfig{
+				*NewRouterConfig(
+					"first_router",
+					WithModels(ModelPoolConfig{
+						{
+							ID:          "first_model",
+							Enabled:     true,
+							Client:      clients.DefaultClientConfig(),
+							ErrorBudget: health.DefaultErrorBudget(),
+							Latency:     latency.DefaultConfig(),
+							Provider: providers.LangProviders{
 								OpenAI: &openai.Config{
 									APIKey:        "ABC",
 									DefaultParams: &defaultParams,
 								},
 							},
 						},
-					},
-				},
+						{
+							ID:          "first_model",
+							Enabled:     true,
+							Client:      clients.DefaultClientConfig(),
+							ErrorBudget: health.DefaultErrorBudget(),
+							Latency:     latency.DefaultConfig(),
+							Provider: providers.LangProviders{
+								OpenAI: &openai.Config{
+									APIKey:        "ABC",
+									DefaultParams: &defaultParams,
+								},
+							},
+						},
+					}),
+				),
 			},
 		},
 		{
 			"no models",
-			routers2.Config{
-				LanguageRouters: []LangRouterConfig{
-					{
-						ID:              "first_router",
-						Enabled:         true,
-						RoutingStrategy: routing.Priority,
-						Retry:           retry.DefaultExpRetryConfig(),
-						Models:          []providers.LangModelConfig{},
-					},
-				},
+			RoutersConfig{
+				*NewRouterConfig(
+					"first_router",
+					WithModels(ModelPoolConfig{}),
+				),
 			},
 		},
 	}
 
 	for _, test := range tests {
-		_, err := test.config.BuildLangRouters(telemetry.NewTelemetryMock())
+		_, err := test.config.Build(telemetry.NewTelemetryMock())
 
 		require.Error(t, err)
 	}

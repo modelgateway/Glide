@@ -16,7 +16,16 @@ import (
 	"github.com/EinStack/glide/pkg/telemetry"
 )
 
-var ErrProviderNotFound = errors.New("provider not found")
+// TODO: ProviderFactory should be more generic, not tied to LangProviders
+
+var ErrNoProviderConfigured = errors.New("exactly one provider must be configured, none is configured")
+
+type ProviderFactory interface {
+	ToClient(tel *telemetry.Telemetry, clientConfig *clients.ClientConfig) (LangProvider, error)
+}
+
+// TODO: LangProviders should be decoupled and
+//	 represented as a registry where providers can add their factories dynamically
 
 type LangProviders struct {
 	// Add other providers like
@@ -29,9 +38,11 @@ type LangProviders struct {
 	Ollama      *ollama.Config      `yaml:"ollama,omitempty" json:"ollama,omitempty"`
 }
 
+var _ ProviderFactory = (*LangProviders)(nil)
+
 // ToClient initializes the language model client based on the provided configuration.
 // It takes a telemetry object as input and returns a LangModelProvider and an error.
-func (c *LangProviders) ToClient(tel *telemetry.Telemetry, clientConfig *clients.ClientConfig) (LangProvider, error) {
+func (c LangProviders) ToClient(tel *telemetry.Telemetry, clientConfig *clients.ClientConfig) (LangProvider, error) {
 	switch {
 	case c.OpenAI != nil:
 		return openai.NewClient(c.OpenAI, clientConfig, tel)
@@ -83,7 +94,7 @@ func (c *LangProviders) validateOneProvider() error {
 
 	// check other providers here
 	if providersConfigured == 0 {
-		return fmt.Errorf("exactly one provider must be configured, none is configured")
+		return ErrNoProviderConfigured
 	}
 
 	if providersConfigured > 1 {
@@ -97,9 +108,7 @@ func (c *LangProviders) validateOneProvider() error {
 }
 
 func (c *LangProviders) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	*c = DefaultConfig()
-
-	type plain LangModelConfig // to avoid recursion
+	type plain LangProviders // to avoid recursion
 
 	if err := unmarshal((*plain)(c)); err != nil {
 		return err

@@ -8,5 +8,6 @@ routers:
     - id: default
       models:
         - id: openai
-          openai:
-            api_key: "${env:OPENAI_API_KEY}"
+          provider:
+            openai:
+              api_key: "${env:OPENAI_API_KEY}"

@@ -3,7 +3,7 @@ package routing
 import (
 	"sync"
 
-	"github.com/EinStack/glide/pkg/providers"
+	"github.com/EinStack/glide/pkg/models"
 )
 
 const (
@@ -11,7 +11,7 @@ const (
 )
 
 type Weighter struct {
-	model         providers.Model
+	model         models.Model
 	currentWeight int
 }
 
@@ -36,7 +36,7 @@ type WRoundRobinRouting struct {
 	weights []*Weighter
 }
 
-func NewWeightedRoundRobin(models []providers.Model) *WRoundRobinRouting {
+func NewWeightedRoundRobin(models []models.Model) *WRoundRobinRouting {
 	weights := make([]*Weighter, 0, len(models))
 
 	for _, model := range models {
@@ -55,7 +55,7 @@ func (r *WRoundRobinRouting) Iterator() LangModelIterator {
 	return r
 }
 
-func (r *WRoundRobinRouting) Next() (providers.Model, error) {
+func (r *WRoundRobinRouting) Next() (models.Model, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

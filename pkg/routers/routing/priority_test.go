@@ -3,9 +3,9 @@ package routing
 import (
 	"testing"
 
-	ptesting "github.com/EinStack/glide/pkg/providers/testing"
+	"github.com/EinStack/glide/pkg/models"
 
-	"github.com/EinStack/glide/pkg/providers"
+	ptesting "github.com/EinStack/glide/pkg/providers/testing"
 
 	"github.com/stretchr/testify/require"
 )
@@ -29,13 +29,13 @@ func TestPriorityRouting_PickModelsInOrder(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			models := make([]providers.Model, 0, len(tc.models))
+			modelPool := make([]models.Model, 0, len(tc.models))
 
 			for _, model := range tc.models {
-				models = append(models, ptesting.NewLangModelMock(model.modelID, model.healthy, 100, 1))
+				modelPool = append(modelPool, ptesting.NewLangModelMock(model.modelID, model.healthy, 100, 1))
 			}
 
-			routing := NewPriority(models)
+			routing := NewPriority(modelPool)
 			iterator := routing.Iterator()
 
 			// loop three times over the whole pool to check if we return back to the begging of the list
@@ -49,13 +49,13 @@ func TestPriorityRouting_PickModelsInOrder(t *testing.T) {
 }
 
 func TestPriorityRouting_NoHealthyModels(t *testing.T) {
-	models := []providers.Model{
+	modelPool := []models.Model{
 		ptesting.NewLangModelMock("first", false, 0, 1),
 		ptesting.NewLangModelMock("second", false, 0, 1),
 		ptesting.NewLangModelMock("third", false, 0, 1),
 	}
 
-	routing := NewPriority(models)
+	routing := NewPriority(modelPool)
 	iterator := routing.Iterator()
 
 	_, err := iterator.Next()

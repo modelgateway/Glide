@@ -3,13 +3,16 @@ package models
 import (
 	"fmt"
 
+	"github.com/EinStack/glide/pkg/providers"
+
 	"github.com/EinStack/glide/pkg/clients"
 	"github.com/EinStack/glide/pkg/resiliency/health"
 	"github.com/EinStack/glide/pkg/routers/latency"
 	"github.com/EinStack/glide/pkg/telemetry"
 )
 
-type Config[P any] struct {
+// Config defines an extra configuration for a model wrapper around a provider
+type Config[P providers.ProviderFactory] struct {
 	ID          string                `yaml:"id" json:"id" validate:"required"`           // Model instance ID (unique in scope of the router)
 	Enabled     bool                  `yaml:"enabled" json:"enabled" validate:"required"` // Is the model enabled?
 	ErrorBudget *health.ErrorBudget   `yaml:"error_budget" json:"error_budget" swaggertype:"primitive,string"`
@@ -20,7 +23,15 @@ type Config[P any] struct {
 	Provider P `yaml:"provider" json:"provider"`
 }
 
-func DefaultConfig[P any]() Config[P] {
+func NewConfig[P providers.ProviderFactory](ID string) *Config[P] {
+	config := DefaultConfig[P]()
+
+	config.ID = ID
+
+	return &config
+}
+
+func DefaultConfig[P providers.ProviderFactory]() Config[P] {
 	return Config[P]{
 		Enabled:     true,
 		Client:      clients.DefaultClientConfig(),
@@ -30,7 +41,7 @@ func DefaultConfig[P any]() Config[P] {
 	}
 }
 
-func (c *Config) ToModel(tel *telemetry.Telemetry) (*LanguageModel, error) {
+func (c *Config[P]) ToModel(tel *telemetry.Telemetry) (*LanguageModel, error) {
 	client, err := c.Provider.ToClient(tel, c.Client)
 	if err != nil {
 		return nil, fmt.Errorf("error initializing client: %w", err)

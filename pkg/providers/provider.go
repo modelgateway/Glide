@@ -2,10 +2,13 @@ package providers
 
 import (
 	"context"
+	"errors"
 
 	"github.com/EinStack/glide/pkg/api/schemas"
 	"github.com/EinStack/glide/pkg/clients"
 )
+
+var ErrProviderNotFound = errors.New("provider not found")
 
 // ModelProvider exposes provider context
 type ModelProvider interface {

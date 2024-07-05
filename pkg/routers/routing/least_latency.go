@@ -5,9 +5,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/EinStack/glide/pkg/routers/latency"
+	"github.com/EinStack/glide/pkg/models"
 
-	"github.com/EinStack/glide/pkg/providers"
+	"github.com/EinStack/glide/pkg/routers/latency"
 )
 
 const (
@@ -15,16 +15,16 @@ const (
 )
 
 // LatencyGetter defines where to find latency for the specific model action
-type LatencyGetter = func(model providers.Model) *latency.MovingAverage
+type LatencyGetter = func(model models.Model) *latency.MovingAverage
 
 // ModelSchedule defines latency update schedule for models
 type ModelSchedule struct {
 	mu       sync.RWMutex
-	model    providers.Model
+	model    models.Model
 	expireAt time.Time
 }
 
-func NewSchedule(model providers.Model) *ModelSchedule {
+func NewSchedule(model models.Model) *ModelSchedule {
 	schedule := &ModelSchedule{
 		model: model,
 	}
@@ -67,7 +67,7 @@ type LeastLatencyRouting struct {
 	schedules     []*ModelSchedule
 }
 
-func NewLeastLatencyRouting(latencyGetter LatencyGetter, models []providers.Model) *LeastLatencyRouting {
+func NewLeastLatencyRouting(latencyGetter LatencyGetter, models []models.Model) *LeastLatencyRouting {
 	schedules := make([]*ModelSchedule, 0, len(models))
 
 	for _, model := range models {
@@ -95,7 +95,7 @@ func (r *LeastLatencyRouting) Iterator() LangModelIterator {
 // other model latencies that might have improved over time).
 // For that, we introduced expiration time after which the model receives a request
 // even if it was not the fastest to respond
-func (r *LeastLatencyRouting) Next() (providers.Model, error) { //nolint:cyclop
+func (r *LeastLatencyRouting) Next() (models.Model, error) { //nolint:cyclop
 	coldSchedules := r.getColdModelSchedules()
 
 	if len(coldSchedules) > 0 {

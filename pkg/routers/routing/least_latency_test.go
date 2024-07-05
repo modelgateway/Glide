@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	ptesting "github.com/EinStack/glide/pkg/providers/testing"
+	"github.com/EinStack/glide/pkg/models"
 
-	"github.com/EinStack/glide/pkg/providers"
+	ptesting "github.com/EinStack/glide/pkg/providers/testing"
 
 	"github.com/stretchr/testify/require"
 )
@@ -33,13 +33,13 @@ func TestLeastLatencyRouting_Warmup(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			models := make([]providers.Model, 0, len(tc.models))
+			modelPool := make([]models.Model, 0, len(tc.models))
 
 			for _, model := range tc.models {
-				models = append(models, ptesting.NewLangModelMock(model.modelID, model.healthy, model.latency, 1))
+				modelPool = append(modelPool, ptesting.NewLangModelMock(model.modelID, model.healthy, model.latency, 1))
 			}
 
-			routing := NewLeastLatencyRouting(ptesting.ChatMockLatency, models)
+			routing := NewLeastLatencyRouting(ptesting.ChatMockLatency, modelPool)
 			iterator := routing.Iterator()
 
 			// loop three times over the whole pool to check if we return back to the begging of the list
@@ -144,13 +144,13 @@ func TestLeastLatencyRouting_NoHealthyModels(t *testing.T) {
 
 	for name, latencies := range tests {
 		t.Run(name, func(t *testing.T) {
-			models := make([]providers.Model, 0, len(latencies))
+			modelPool := make([]models.Model, 0, len(latencies))
 
 			for idx, latency := range latencies {
-				models = append(models, ptesting.NewLangModelMock(strconv.Itoa(idx), false, latency, 1))
+				modelPool = append(modelPool, ptesting.NewLangModelMock(strconv.Itoa(idx), false, latency, 1))
 			}
 
-			routing := NewLeastLatencyRouting(models.ChatLatency, models)
+			routing := NewLeastLatencyRouting(models.ChatLatency, modelPool)
 			iterator := routing.Iterator()
 
 			_, err := iterator.Next()

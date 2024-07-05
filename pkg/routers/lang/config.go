@@ -15,12 +15,37 @@ import (
 	"go.uber.org/zap"
 )
 
-// TODO: how to specify other backoff strategies?
-// TODO: Had to keep RoutingStrategy because of https://github.com/swaggo/swag/issues/1738
+type (
+	ModelConfig     = models.Config[providers.LangProviders]
+	ModelPoolConfig = []ModelConfig
+)
+
 // RouterConfig
 type RouterConfig struct {
 	routers.RouterConfig
-	Models []providers.LangModelConfig `yaml:"models" json:"models" validate:"required,min=1,dive"` // the list of models that could handle requests
+	Models ModelPoolConfig `yaml:"models" json:"models" validate:"required,min=1,dive"` // the list of models that could handle requests
+}
+
+type RouterConfigOption = func(*RouterConfig)
+
+func WithModels(models ModelPoolConfig) RouterConfigOption {
+	return func(c *RouterConfig) {
+		c.Models = models
+	}
+}
+
+func NewRouterConfig(RouterID string, opt ...RouterConfigOption) *RouterConfig {
+	config := &RouterConfig{
+		RouterConfig: routers.DefaultConfig(),
+	}
+
+	config.ID = RouterID
+
+	for _, o := range opt {
+		o(config)
+	}
+
+	return config
 }
 
 // BuildModels creates LanguageModel slice out of the given config
@@ -165,11 +190,7 @@ func (c *RouterConfig) BuildRouting(
 
 func DefaultRouterConfig() *RouterConfig {
 	return &RouterConfig{
-		RouterConfig: routers.RouterConfig{
-			Enabled:         true,
-			RoutingStrategy: routing.Priority,
-			Retry:           retry.DefaultExpRetryConfig(),
-		},
+		RouterConfig: routers.DefaultConfig(),
 	}
 }
 

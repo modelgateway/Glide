@@ -3,9 +3,9 @@ package routing
 import (
 	"testing"
 
-	ptesting "github.com/EinStack/glide/pkg/providers/testing"
+	"github.com/EinStack/glide/pkg/models"
 
-	"github.com/EinStack/glide/pkg/providers"
+	ptesting "github.com/EinStack/glide/pkg/providers/testing"
 
 	"github.com/stretchr/testify/require"
 )
@@ -116,13 +116,13 @@ func TestWRoundRobinRouting_RoutingDistribution(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			models := make([]providers.Model, 0, len(tc.models))
+			modelPool := make([]models.Model, 0, len(tc.models))
 
 			for _, model := range tc.models {
-				models = append(models, ptesting.NewLangModelMock(model.modelID, model.healthy, 0, model.weight))
+				modelPool = append(modelPool, ptesting.NewLangModelMock(model.modelID, model.healthy, 0, model.weight))
 			}
 
-			routing := NewWeightedRoundRobin(models)
+			routing := NewWeightedRoundRobin(modelPool)
 			iterator := routing.Iterator()
 
 			actualDistribution := make(map[string]int, len(tc.models))
@@ -142,13 +142,13 @@ func TestWRoundRobinRouting_RoutingDistribution(t *testing.T) {
 }
 
 func TestWRoundRobinRouting_NoHealthyModels(t *testing.T) {
-	models := []providers.Model{
+	modelPool := []models.Model{
 		ptesting.NewLangModelMock("first", false, 0, 1),
 		ptesting.NewLangModelMock("second", false, 0, 2),
 		ptesting.NewLangModelMock("third", false, 0, 3),
 	}
 
-	routing := NewWeightedRoundRobin(models)
+	routing := NewWeightedRoundRobin(modelPool)
 	iterator := routing.Iterator()
 
 	_, err := iterator.Next()
