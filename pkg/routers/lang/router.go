@@ -3,28 +3,24 @@ package lang
 import (
 	"context"
 	"errors"
-	"github.com/EinStack/glide/pkg/resiliency/retry"
-
-	"go.uber.org/zap"
-
-	"github.com/EinStack/glide/pkg/providers"
-
-	"github.com/EinStack/glide/pkg/telemetry"
-
-	"github.com/EinStack/glide/pkg/routers/routing"
 
 	"github.com/EinStack/glide/pkg/api/schemas"
+	"github.com/EinStack/glide/pkg/models"
+	"github.com/EinStack/glide/pkg/resiliency/retry"
+	"github.com/EinStack/glide/pkg/routers/routing"
+	"github.com/EinStack/glide/pkg/telemetry"
+	"go.uber.org/zap"
 )
 
 var ErrNoModels = errors.New("no models configured for router")
 
 type RouterID = string
 
-type LangRouter struct {
+type Router struct {
 	routerID          RouterID
-	Config            *LangRouterConfig
-	chatModels        []*providers.LanguageModel
-	chatStreamModels  []*providers.LanguageModel
+	Config            *RouterConfig
+	chatModels        []*models.LanguageModel
+	chatStreamModels  []*models.LanguageModel
 	chatRouting       routing.LangModelRouting
 	chatStreamRouting routing.LangModelRouting
 	retry             *retry.ExpRetry
@@ -32,7 +28,7 @@ type LangRouter struct {
 	logger            *zap.Logger
 }
 
-func NewLangRouter(cfg *LangRouterConfig, tel *telemetry.Telemetry) (*LangRouter, error) {
+func NewLangRouter(cfg *RouterConfig, tel *telemetry.Telemetry) (*Router, error) {
 	chatModels, chatStreamModels, err := cfg.BuildModels(tel)
 	if err != nil {
 		return nil, err
@@ -43,7 +39,7 @@ func NewLangRouter(cfg *LangRouterConfig, tel *telemetry.Telemetry) (*LangRouter
 		return nil, err
 	}
 
-	router := &LangRouter{
+	router := &Router{
 		routerID:          cfg.ID,
 		Config:            cfg,
 		chatModels:        chatModels,
@@ -58,11 +54,11 @@ func NewLangRouter(cfg *LangRouterConfig, tel *telemetry.Telemetry) (*LangRouter
 	return router, err
 }
 
-func (r *LangRouter) ID() RouterID {
+func (r *Router) ID() RouterID {
 	return r.routerID
 }
 
-func (r *LangRouter) Chat(ctx context.Context, req *schemas.ChatRequest) (*schemas.ChatResponse, error) {
+func (r *Router) Chat(ctx context.Context, req *schemas.ChatRequest) (*schemas.ChatResponse, error) {
 	if len(r.chatModels) == 0 {
 		return nil, ErrNoModels
 	}
@@ -80,7 +76,7 @@ func (r *LangRouter) Chat(ctx context.Context, req *schemas.ChatRequest) (*schem
 				break
 			}
 
-			langModel := model.(providers.LangModel)
+			langModel := model.(models.LangModel)
 
 			chatParams := req.Params(langModel.ID(), langModel.ModelName())
 
@@ -118,7 +114,7 @@ func (r *LangRouter) Chat(ctx context.Context, req *schemas.ChatRequest) (*schem
 	return nil, &schemas.ErrNoModelAvailable
 }
 
-func (r *LangRouter) ChatStream(
+func (r *Router) ChatStream(
 	ctx context.Context,
 	req *schemas.ChatStreamRequest,
 	respC chan<- *schemas.ChatStreamMessage,
@@ -150,7 +146,7 @@ func (r *LangRouter) ChatStream(
 				break
 			}
 
-			langModel := model.(providers.LangModel)
+			langModel := model.(models.LangModel)
 			chatParams := req.Params(langModel.ID(), langModel.ModelName())
 
 			modelRespC, err := langModel.ChatStream(ctx, chatParams)
@@ -237,8 +233,4 @@ func (r *LangRouter) ChatStream(
 		req.Metadata,
 		&schemas.ReasonError,
 	)
-}
-
-func (r *LangRouter) Embed(ctx context.Context, req *schemas.EmbedRequest) (*schemas.EmbedResponse, error) {
-
 }

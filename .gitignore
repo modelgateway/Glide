@@ -1,9 +1,11 @@
 .idea
 dist
 .env
+.env.bak
 config.yaml
 bin
 glide
+glide.exe
 tmp
 coverage.txt
 precommit.txt

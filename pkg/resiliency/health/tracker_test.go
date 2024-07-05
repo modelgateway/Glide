@@ -1,9 +1,10 @@
 package health
 
 import (
-	"github.com/EinStack/glide/pkg/clients"
 	"testing"
 	"time"
+
+	"github.com/EinStack/glide/pkg/clients"
 
 	"github.com/stretchr/testify/require"
 )

@@ -4,8 +4,9 @@ import (
 	"context"
 	"sync"
 
+	"github.com/EinStack/glide/pkg/routers/manager"
+
 	"github.com/EinStack/glide/pkg/api/schemas"
-	"github.com/EinStack/glide/pkg/routers"
 	"github.com/EinStack/glide/pkg/telemetry"
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
@@ -31,7 +32,7 @@ type Handler = func(c *fiber.Ctx) error
 //	@Failure		400	{object}	schemas.Error
 //	@Failure		404	{object}	schemas.Error
 //	@Router			/v1/language/{router}/chat [POST]
-func LangChatHandler(routerManager *routers.RouterManager) Handler {
+func LangChatHandler(routerManager *manager.RouterManager) Handler {
 	return func(c *fiber.Ctx) error {
 		if !c.Is("json") {
 			return c.Status(fiber.StatusBadRequest).JSON(schemas.ErrUnsupportedMediaType)
@@ -72,7 +73,7 @@ func LangChatHandler(routerManager *routers.RouterManager) Handler {
 	}
 }
 
-func LangStreamRouterValidator(routerManager *routers.RouterManager) Handler {
+func LangStreamRouterValidator(routerManager *manager.RouterManager) Handler {
 	return func(c *fiber.Ctx) error {
 		if websocket.IsWebSocketUpgrade(c) {
 			routerID := c.Params("router")
@@ -107,7 +108,7 @@ func LangStreamRouterValidator(routerManager *routers.RouterManager) Handler {
 //	@Failure		426
 //	@Failure		404	{object}	schemas.Error
 //	@Router			/v1/language/{router}/chatStream [GET]
-func LangStreamChatHandler(tel *telemetry.Telemetry, routerManager *routers.RouterManager) Handler {
+func LangStreamChatHandler(tel *telemetry.Telemetry, routerManager *manager.RouterManager) Handler {
 	// TODO: expose websocket connection configs https://github.com/gofiber/contrib/tree/main/websocket
 	return websocket.New(func(c *websocket.Conn) {
 		routerID := c.Params("router")
@@ -175,7 +176,7 @@ func LangStreamChatHandler(tel *telemetry.Telemetry, routerManager *routers.Rout
 //	@Produce		json
 //	@Success		200	{object}	schemas.RouterListSchema
 //	@Router			/v1/language/ [GET]
-func LangRoutersHandler(routerManager *routers.RouterManager) Handler {
+func LangRoutersHandler(routerManager *manager.RouterManager) Handler {
 	return func(c *fiber.Ctx) error {
 		configuredRouters := routerManager.GetLangRouters()
 		cfgs := make([]interface{}, 0, len(configuredRouters)) // opaque by design

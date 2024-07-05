@@ -2,8 +2,9 @@ package testing
 
 import (
 	"context"
-	clients2 "github.com/EinStack/glide/pkg/clients"
 	"io"
+
+	clients2 "github.com/EinStack/glide/pkg/clients"
 
 	"github.com/EinStack/glide/pkg/api/schemas"
 )

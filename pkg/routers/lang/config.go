@@ -2,33 +2,34 @@ package lang
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/EinStack/glide/pkg/routers"
+
+	"github.com/EinStack/glide/pkg/models"
 	"github.com/EinStack/glide/pkg/providers"
-	retry2 "github.com/EinStack/glide/pkg/resiliency/retry"
+	"github.com/EinStack/glide/pkg/resiliency/retry"
 	"github.com/EinStack/glide/pkg/routers/routing"
 	"github.com/EinStack/glide/pkg/telemetry"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
-	"time"
 )
 
 // TODO: how to specify other backoff strategies?
 // TODO: Had to keep RoutingStrategy because of https://github.com/swaggo/swag/issues/1738
-// LangRouterConfig
-type LangRouterConfig struct {
-	ID              string                      `yaml:"id" json:"routers" validate:"required"`                                       // Unique router ID
-	Enabled         bool                        `yaml:"enabled" json:"enabled" validate:"required"`                                  // Is router enabled?
-	Retry           *retry2.ExpRetryConfig      `yaml:"retry" json:"retry" validate:"required"`                                      // retry when no healthy model is available to router
-	RoutingStrategy routing.Strategy            `yaml:"strategy" json:"strategy" swaggertype:"primitive,string" validate:"required"` // strategy on picking the next model to serve the request
-	Models          []providers.LangModelConfig `yaml:"models" json:"models" validate:"required,min=1,dive"`                         // the list of models that could handle requests
+// RouterConfig
+type RouterConfig struct {
+	routers.RouterConfig
+	Models []providers.LangModelConfig `yaml:"models" json:"models" validate:"required,min=1,dive"` // the list of models that could handle requests
 }
 
 // BuildModels creates LanguageModel slice out of the given config
-func (c *LangRouterConfig) BuildModels(tel *telemetry.Telemetry) ([]*providers.LanguageModel, []*providers.LanguageModel, error) { //nolint: cyclop
+func (c *RouterConfig) BuildModels(tel *telemetry.Telemetry) ([]*models.LanguageModel, []*models.LanguageModel, error) { //nolint: cyclop
 	var errs error
 
 	seenIDs := make(map[string]bool, len(c.Models))
-	chatModels := make([]*providers.LanguageModel, 0, len(c.Models))
-	chatStreamModels := make([]*providers.LanguageModel, 0, len(c.Models))
+	chatModels := make([]*models.LanguageModel, 0, len(c.Models))
+	chatStreamModels := make([]*models.LanguageModel, 0, len(c.Models))
 
 	for _, modelConfig := range c.Models {
 		if _, ok := seenIDs[modelConfig.ID]; ok {
@@ -119,11 +120,11 @@ func (c *LangRouterConfig) BuildModels(tel *telemetry.Telemetry) ([]*providers.L
 	return chatModels, chatStreamModels, nil
 }
 
-func (c *LangRouterConfig) BuildRetry() *retry2.ExpRetry {
+func (c *RouterConfig) BuildRetry() *retry.ExpRetry {
 	retryConfig := c.Retry
 	maxDelay := time.Duration(*retryConfig.MaxDelay)
 
-	return retry2.NewExpRetry(
+	return retry.NewExpRetry(
 		retryConfig.MaxRetries,
 		retryConfig.BaseMultiplier,
 		time.Duration(retryConfig.MinDelay),
@@ -131,12 +132,12 @@ func (c *LangRouterConfig) BuildRetry() *retry2.ExpRetry {
 	)
 }
 
-func (c *LangRouterConfig) BuildRouting(
-	chatModels []*providers.LanguageModel,
-	chatStreamModels []*providers.LanguageModel,
+func (c *RouterConfig) BuildRouting(
+	chatModels []*models.LanguageModel,
+	chatStreamModels []*models.LanguageModel,
 ) (routing.LangModelRouting, routing.LangModelRouting, error) {
-	chatModelPool := make([]providers.Model, 0, len(chatModels))
-	chatStreamModelPool := make([]providers.Model, 0, len(chatStreamModels))
+	chatModelPool := make([]models.Model, 0, len(chatModels))
+	chatStreamModelPool := make([]models.Model, 0, len(chatStreamModels))
 
 	for _, model := range chatModels {
 		chatModelPool = append(chatModelPool, model)
@@ -154,26 +155,66 @@ func (c *LangRouterConfig) BuildRouting(
 	case routing.WeightedRoundRobin:
 		return routing.NewWeightedRoundRobin(chatModelPool), routing.NewWeightedRoundRobin(chatStreamModelPool), nil
 	case routing.LeastLatency:
-		return routing.NewLeastLatencyRouting(providers.ChatLatency, chatModelPool),
-			routing.NewLeastLatencyRouting(providers.ChatStreamLatency, chatStreamModelPool),
+		return routing.NewLeastLatencyRouting(models.ChatLatency, chatModelPool),
+			routing.NewLeastLatencyRouting(models.ChatStreamLatency, chatStreamModelPool),
 			nil
 	}
 
 	return nil, nil, fmt.Errorf("routing strategy \"%v\" is not supported, please make sure there is no typo", c.RoutingStrategy)
 }
 
-func DefaultLangRouterConfig() LangRouterConfig {
-	return LangRouterConfig{
-		Enabled:         true,
-		RoutingStrategy: routing.Priority,
-		Retry:           retry2.DefaultExpRetryConfig(),
+func DefaultRouterConfig() *RouterConfig {
+	return &RouterConfig{
+		RouterConfig: routers.RouterConfig{
+			Enabled:         true,
+			RoutingStrategy: routing.Priority,
+			Retry:           retry.DefaultExpRetryConfig(),
+		},
 	}
 }
 
-func (c *LangRouterConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	*c = DefaultLangRouterConfig()
+func (c *RouterConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	*c = *DefaultRouterConfig()
 
-	type plain LangRouterConfig // to avoid recursion
+	type plain RouterConfig // to avoid recursion
 
 	return unmarshal((*plain)(c))
+}
+
+type RoutersConfig []RouterConfig
+
+func (c RoutersConfig) Build(tel *telemetry.Telemetry) ([]*Router, error) {
+	seenIDs := make(map[string]bool, len(c))
+	langRouters := make([]*Router, 0, len(c))
+
+	var errs error
+
+	for idx, routerConfig := range c {
+		if _, ok := seenIDs[routerConfig.ID]; ok {
+			return nil, fmt.Errorf("ID \"%v\" is specified for more than one router while each ID should be unique", routerConfig.ID)
+		}
+
+		seenIDs[routerConfig.ID] = true
+
+		if !routerConfig.Enabled {
+			tel.L().Info(fmt.Sprintf("Router \"%v\" is disabled, skipping", routerConfig.ID))
+			continue
+		}
+
+		tel.L().Debug("Init router", zap.String("routerID", routerConfig.ID))
+
+		router, err := NewLangRouter(&c[idx], tel)
+		if err != nil {
+			errs = multierr.Append(errs, err)
+			continue
+		}
+
+		langRouters = append(langRouters, router)
+	}
+
+	if errs != nil {
+		return nil, errs
+	}
+
+	return langRouters, nil
 }

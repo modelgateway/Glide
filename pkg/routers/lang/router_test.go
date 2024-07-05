@@ -2,11 +2,14 @@ package lang
 
 import (
 	"context"
+	"testing"
+	"time"
+
+	"github.com/EinStack/glide/pkg/models"
+
 	"github.com/EinStack/glide/pkg/clients"
 	"github.com/EinStack/glide/pkg/resiliency/health"
 	"github.com/EinStack/glide/pkg/resiliency/retry"
-	"testing"
-	"time"
 
 	"github.com/EinStack/glide/pkg/api/schemas"
 	"github.com/EinStack/glide/pkg/providers"
@@ -21,15 +24,15 @@ func TestLangRouter_Chat_PickFistHealthy(t *testing.T) {
 	budget := health.NewErrorBudget(3, health.SEC)
 	latConfig := latency.DefaultConfig()
 
-	langModels := []*providers.LanguageModel{
-		providers.NewLangModel(
+	langModels := []*models.LanguageModel{
+		models.NewLangModel(
 			"first",
 			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Msg: "1"}, {Msg: "2"}}),
 			budget,
 			*latConfig,
 			1,
 		),
-		providers.NewLangModel(
+		models.NewLangModel(
 			"second",
 			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Msg: "1"}}),
 			budget,
@@ -68,22 +71,22 @@ func TestLangRouter_Chat_PickFistHealthy(t *testing.T) {
 func TestLangRouter_Chat_PickThirdHealthy(t *testing.T) {
 	budget := health.NewErrorBudget(1, health.SEC)
 	latConfig := latency.DefaultConfig()
-	langModels := []*providers.LanguageModel{
-		providers.NewLangModel(
+	langModels := []*models.LanguageModel{
+		models.NewLangModel(
 			"first",
 			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "3"}}),
 			budget,
 			*latConfig,
 			1,
 		),
-		providers.NewLangModel(
+		models.NewLangModel(
 			"second",
 			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "4"}}),
 			budget,
 			*latConfig,
 			1,
 		),
-		providers.NewLangModel(
+		models.NewLangModel(
 			"third",
 			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Msg: "1"}, {Msg: "2"}}),
 			budget,
@@ -126,15 +129,15 @@ func TestLangRouter_Chat_PickThirdHealthy(t *testing.T) {
 func TestLangRouter_Chat_SuccessOnRetry(t *testing.T) {
 	budget := health.NewErrorBudget(1, health.MILLI)
 	latConfig := latency.DefaultConfig()
-	langModels := []*providers.LanguageModel{
-		providers.NewLangModel(
+	langModels := []*models.LanguageModel{
+		models.NewLangModel(
 			"first",
 			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "2"}}),
 			budget,
 			*latConfig,
 			1,
 		),
-		providers.NewLangModel(
+		models.NewLangModel(
 			"second",
 			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "1"}}),
 			budget,
@@ -170,15 +173,15 @@ func TestLangRouter_Chat_SuccessOnRetry(t *testing.T) {
 func TestLangRouter_Chat_UnhealthyModelInThePool(t *testing.T) {
 	budget := health.NewErrorBudget(1, health.MIN)
 	latConfig := latency.DefaultConfig()
-	langModels := []*providers.LanguageModel{
-		providers.NewLangModel(
+	langModels := []*models.LanguageModel{
+		models.NewLangModel(
 			"first",
 			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Err: clients.ErrProviderUnavailable}, {Msg: "3"}}),
 			budget,
 			*latConfig,
 			1,
 		),
-		providers.NewLangModel(
+		models.NewLangModel(
 			"second",
 			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Msg: "1"}, {Msg: "2"}}),
 			budget,
@@ -216,15 +219,15 @@ func TestLangRouter_Chat_UnhealthyModelInThePool(t *testing.T) {
 func TestLangRouter_Chat_AllModelsUnavailable(t *testing.T) {
 	budget := health.NewErrorBudget(1, health.SEC)
 	latConfig := latency.DefaultConfig()
-	langModels := []*providers.LanguageModel{
-		providers.NewLangModel(
+	langModels := []*models.LanguageModel{
+		models.NewLangModel(
 			"first",
 			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Err: &schemas.ErrNoModelAvailable}}),
 			budget,
 			*latConfig,
 			1,
 		),
-		providers.NewLangModel(
+		models.NewLangModel(
 			"second",
 			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Err: &schemas.ErrNoModelAvailable}}),
 			budget,
@@ -259,8 +262,8 @@ func TestLangRouter_ChatStream(t *testing.T) {
 	budget := health.NewErrorBudget(3, health.SEC)
 	latConfig := latency.DefaultConfig()
 
-	langModels := []*providers.LanguageModel{
-		providers.NewLangModel(
+	langModels := []*models.LanguageModel{
+		models.NewLangModel(
 			"first",
 			ptesting.NewStreamProviderMock(nil, []ptesting.RespStreamMock{
 				ptesting.NewRespStreamMock(&[]ptesting.RespMock{
@@ -275,7 +278,7 @@ func TestLangRouter_ChatStream(t *testing.T) {
 			*latConfig,
 			1,
 		),
-		providers.NewLangModel(
+		models.NewLangModel(
 			"second",
 			ptesting.NewStreamProviderMock(nil, []ptesting.RespStreamMock{
 				ptesting.NewRespStreamMock(&[]ptesting.RespMock{
@@ -335,15 +338,15 @@ func TestLangRouter_ChatStream_FailOnFirst(t *testing.T) {
 	budget := health.NewErrorBudget(3, health.SEC)
 	latConfig := latency.DefaultConfig()
 
-	langModels := []*providers.LanguageModel{
-		providers.NewLangModel(
+	langModels := []*models.LanguageModel{
+		models.NewLangModel(
 			"first",
 			ptesting.NewStreamProviderMock(nil, nil),
 			budget,
 			*latConfig,
 			1,
 		),
-		providers.NewLangModel(
+		models.NewLangModel(
 			"second",
 			ptesting.NewStreamProviderMock(nil, []ptesting.RespStreamMock{
 				ptesting.NewRespStreamMock(
@@ -405,8 +408,8 @@ func TestLangRouter_ChatStream_AllModelsUnavailable(t *testing.T) {
 	budget := health.NewErrorBudget(1, health.SEC)
 	latConfig := latency.DefaultConfig()
 
-	langModels := []*providers.LanguageModel{
-		providers.NewLangModel(
+	langModels := []*models.LanguageModel{
+		models.NewLangModel(
 			"first",
 			ptesting.NewStreamProviderMock(nil, []ptesting.RespStreamMock{
 				ptesting.NewRespStreamMock(&[]ptesting.RespMock{
@@ -417,7 +420,7 @@ func TestLangRouter_ChatStream_AllModelsUnavailable(t *testing.T) {
 			*latConfig,
 			1,
 		),
-		providers.NewLangModel(
+		models.NewLangModel(
 			"second",
 			ptesting.NewStreamProviderMock(nil, []ptesting.RespStreamMock{
 				ptesting.NewRespStreamMock(&[]ptesting.RespMock{

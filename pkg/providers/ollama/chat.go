@@ -5,10 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/EinStack/glide/pkg/clients"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/EinStack/glide/pkg/clients"
 
 	"github.com/google/uuid"
 

@@ -3,10 +3,11 @@ package bedrock
 import (
 	"context"
 	"errors"
-	"github.com/EinStack/glide/pkg/clients"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/EinStack/glide/pkg/clients"
 
 	"github.com/EinStack/glide/pkg/telemetry"
 

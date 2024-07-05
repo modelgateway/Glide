@@ -4,13 +4,14 @@ package cohere
 import (
 	"context"
 	"encoding/json"
-	"github.com/EinStack/glide/pkg/clients"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/EinStack/glide/pkg/clients"
 
 	"github.com/EinStack/glide/pkg/api/schemas"
 

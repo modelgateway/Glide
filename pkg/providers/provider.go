@@ -1,7 +1,10 @@
 package providers
 
 import (
-	"github.com/EinStack/glide/pkg/config/fields"
+	"context"
+
+	"github.com/EinStack/glide/pkg/api/schemas"
+	"github.com/EinStack/glide/pkg/clients"
 )
 
 // ModelProvider exposes provider context
@@ -10,10 +13,12 @@ type ModelProvider interface {
 	ModelName() string
 }
 
-// Model represent a configured external modality-agnostic model with its routing properties and status
-type Model interface {
-	ID() string
-	Healthy() bool
-	LatencyUpdateInterval() *fields.Duration
-	Weight() int
+// LangProvider defines an interface a provider should fulfill to be able to serve language chat requests
+type LangProvider interface {
+	ModelProvider
+
+	SupportChatStream() bool
+
+	Chat(ctx context.Context, params *schemas.ChatParams) (*schemas.ChatResponse, error)
+	ChatStream(ctx context.Context, params *schemas.ChatParams) (clients.ChatStream, error)
 }

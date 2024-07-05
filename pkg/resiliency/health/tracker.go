@@ -2,6 +2,7 @@ package health
 
 import (
 	"errors"
+
 	"github.com/EinStack/glide/pkg/clients"
 )
 

@@ -5,9 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	clients2 "github.com/EinStack/glide/pkg/clients"
 	"io"
 	"net/http"
+
+	clients2 "github.com/EinStack/glide/pkg/clients"
 
 	"github.com/r3labs/sse/v2"
 	"go.uber.org/zap"

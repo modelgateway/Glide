@@ -1,51 +1,13 @@
 package routers
 
 import (
-	"fmt"
-	"github.com/EinStack/glide/pkg/routers/lang"
-	"github.com/EinStack/glide/pkg/telemetry"
-
-	"go.uber.org/multierr"
-	"go.uber.org/zap"
+	"github.com/EinStack/glide/pkg/resiliency/retry"
+	"github.com/EinStack/glide/pkg/routers/routing"
 )
 
-type Config struct {
-	LanguageRouters  []lang.LangRouterConfig `yaml:"language" validate:"required,dive"` // the list of language routers
-	EmbeddingRouters []EmbeddingRouterConfig `yaml:"embedding" validate:"required,dive"`
-}
-
-func (c *Config) BuildLangRouters(tel *telemetry.Telemetry) ([]*lang.LangRouter, error) {
-	seenIDs := make(map[string]bool, len(c.LanguageRouters))
-	routers := make([]*lang.LangRouter, 0, len(c.LanguageRouters))
-
-	var errs error
-
-	for idx, routerConfig := range c.LanguageRouters {
-		if _, ok := seenIDs[routerConfig.ID]; ok {
-			return nil, fmt.Errorf("ID \"%v\" is specified for more than one router while each ID should be unique", routerConfig.ID)
-		}
-
-		seenIDs[routerConfig.ID] = true
-
-		if !routerConfig.Enabled {
-			tel.L().Info(fmt.Sprintf("Router \"%v\" is disabled, skipping", routerConfig.ID))
-			continue
-		}
-
-		tel.L().Debug("Init router", zap.String("routerID", routerConfig.ID))
-
-		router, err := lang.NewLangRouter(&c.LanguageRouters[idx], tel)
-		if err != nil {
-			errs = multierr.Append(errs, err)
-			continue
-		}
-
-		routers = append(routers, router)
-	}
-
-	if errs != nil {
-		return nil, errs
-	}
-
-	return routers, nil
+type RouterConfig struct {
+	ID              string                `yaml:"id" json:"routers" validate:"required"`                                       // Unique router ID
+	Enabled         bool                  `yaml:"enabled" json:"enabled" validate:"required"`                                  // Is router enabled?
+	Retry           *retry.ExpRetryConfig `yaml:"retry" json:"retry" validate:"required"`                                      // retry when no healthy model is available to router
+	RoutingStrategy routing.Strategy      `yaml:"strategy" json:"strategy" swaggertype:"primitive,string" validate:"required"` // strategy on picking the next model to serve the request
 }

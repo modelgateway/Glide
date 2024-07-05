@@ -150,7 +150,7 @@ func TestLeastLatencyRouting_NoHealthyModels(t *testing.T) {
 				models = append(models, ptesting.NewLangModelMock(strconv.Itoa(idx), false, latency, 1))
 			}
 
-			routing := NewLeastLatencyRouting(providers.ChatLatency, models)
+			routing := NewLeastLatencyRouting(models.ChatLatency, models)
 			iterator := routing.Iterator()
 
 			_, err := iterator.Next()

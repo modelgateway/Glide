@@ -3,13 +3,14 @@ package openai
 import (
 	"context"
 	"encoding/json"
-	clients2 "github.com/EinStack/glide/pkg/clients"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
+
+	clients2 "github.com/EinStack/glide/pkg/clients"
 
 	"github.com/EinStack/glide/pkg/api/schemas"
 

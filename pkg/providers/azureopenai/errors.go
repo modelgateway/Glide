@@ -2,10 +2,11 @@ package azureopenai
 
 import (
 	"fmt"
-	"github.com/EinStack/glide/pkg/clients"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/EinStack/glide/pkg/clients"
 
 	"github.com/EinStack/glide/pkg/telemetry"
 

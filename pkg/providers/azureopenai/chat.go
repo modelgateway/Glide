@@ -5,9 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/EinStack/glide/pkg/clients"
 	"io"
 	"net/http"
+
+	"github.com/EinStack/glide/pkg/clients"
 
 	"github.com/EinStack/glide/pkg/providers/openai"
 

@@ -1,11 +1,14 @@
-package providers
+package models
 
 import (
 	"context"
-	"github.com/EinStack/glide/pkg/clients"
-	health2 "github.com/EinStack/glide/pkg/resiliency/health"
 	"io"
 	"time"
+
+	"github.com/EinStack/glide/pkg/providers"
+
+	"github.com/EinStack/glide/pkg/clients"
+	health2 "github.com/EinStack/glide/pkg/resiliency/health"
 
 	"github.com/EinStack/glide/pkg/config/fields"
 
@@ -13,16 +16,6 @@ import (
 
 	"github.com/EinStack/glide/pkg/api/schemas"
 )
-
-// LangProvider defines an interface a provider should fulfill to be able to serve language chat requests
-type LangProvider interface {
-	ModelProvider
-
-	SupportChatStream() bool
-
-	Chat(ctx context.Context, params *schemas.ChatParams) (*schemas.ChatResponse, error)
-	ChatStream(ctx context.Context, params *schemas.ChatParams) (clients.ChatStream, error)
-}
 
 type LangModel interface {
 	Model
@@ -39,14 +32,14 @@ type LangModel interface {
 type LanguageModel struct {
 	modelID               string
 	weight                int
-	client                LangProvider
+	client                providers.LangProvider
 	healthTracker         *health2.Tracker
 	chatLatency           *latency.MovingAverage
 	chatStreamLatency     *latency.MovingAverage
 	latencyUpdateInterval *fields.Duration
 }
 
-func NewLangModel(modelID string, client LangProvider, budget *health2.ErrorBudget, latencyConfig latency.Config, weight int) *LanguageModel {
+func NewLangModel(modelID string, client providers.LangProvider, budget *health2.ErrorBudget, latencyConfig latency.Config, weight int) *LanguageModel {
 	return &LanguageModel{
 		modelID:               modelID,
 		client:                client,

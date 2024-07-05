@@ -2,6 +2,7 @@ package embed
 
 import (
 	"context"
+
 	"github.com/EinStack/glide/pkg/api/schemas"
 	"github.com/EinStack/glide/pkg/resiliency/retry"
 	"github.com/EinStack/glide/pkg/routers/lang"
@@ -17,6 +18,5 @@ type EmbeddingRouter struct {
 	logger   *zap.Logger
 }
 
-func (r *lang.LangRouter) Embed(ctx context.Context, req *schemas.EmbedRequest) (*schemas.EmbedResponse, error) {
-
+func (r *EmbeddingRouter) Embed(ctx context.Context, req *schemas.EmbedRequest) (*schemas.EmbedResponse, error) {
 }
