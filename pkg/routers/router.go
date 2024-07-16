@@ -3,7 +3,10 @@ package routers
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
 
+	"github.com/EinStack/glide/pkg/cache"
 	"github.com/EinStack/glide/pkg/routers/retry"
 	"go.uber.org/zap"
 
@@ -30,6 +33,7 @@ type LangRouter struct {
 	retry             *retry.ExpRetry
 	tel               *telemetry.Telemetry
 	logger            *zap.Logger
+	cache             *cache.MemoryCache
 }
 
 func NewLangRouter(cfg *LangRouterConfig, tel *telemetry.Telemetry) (*LangRouter, error) {
@@ -53,6 +57,7 @@ func NewLangRouter(cfg *LangRouterConfig, tel *telemetry.Telemetry) (*LangRouter
 		chatStreamRouting: chatStreamRouting,
 		tel:               tel,
 		logger:            tel.L().With(zap.String("routerID", cfg.ID)),
+		cache:             cache.NewMemoryCache(),
 	}
 
 	return router, err
@@ -65,6 +70,17 @@ func (r *LangRouter) ID() RouterID {
 func (r *LangRouter) Chat(ctx context.Context, req *schemas.ChatRequest) (*schemas.ChatResponse, error) {
 	if len(r.chatModels) == 0 {
 		return nil, ErrNoModels
+	}
+
+	// Generate cache key
+	cacheKey := req.Message.Content
+	if cachedResponse, found := r.cache.Get(cacheKey); found {
+		log.Println("found cached response and returning: ", cachedResponse)
+		if response, ok := cachedResponse.(*schemas.ChatResponse); ok {
+			return response, nil
+		} else {
+			log.Println("Failed to cast cached response to ChatResponse")
+		}
 	}
 
 	retryIterator := r.retry.Iterator()
@@ -92,17 +108,17 @@ func (r *LangRouter) Chat(ctx context.Context, req *schemas.ChatRequest) (*schem
 					zap.String("provider", langModel.Provider()),
 					zap.Error(err),
 				)
-
 				continue
 			}
 
 			resp.RouterID = r.routerID
 
+			// Store response in cache
+			r.cache.Set(cacheKey, resp)
+
 			return resp, nil
 		}
 
-		// no providers were available to handle the request,
-		//  so we have to wait a bit with a hope there is some available next time
 		r.logger.Warn("No healthy model found to serve chat request, wait and retry")
 
 		err := retryIterator.WaitNext(ctx)
@@ -112,7 +128,6 @@ func (r *LangRouter) Chat(ctx context.Context, req *schemas.ChatRequest) (*schem
 		}
 	}
 
-	// if we reach this part, then we are in trouble
 	r.logger.Error("No model was available to handle chat request")
 
 	return nil, &schemas.ErrNoModelAvailable
@@ -132,8 +147,41 @@ func (r *LangRouter) ChatStream(
 			req.Metadata,
 			&schemas.ReasonError,
 		)
-
 		return
+	}
+
+	cacheKey := req.Message.Content
+	if streamingCacheEntry, found := r.cache.Get(cacheKey); found {
+		if entry, ok := streamingCacheEntry.(*schemas.StreamingCacheEntry); ok {
+			for _, chunkKey := range entry.ResponseChunks {
+				if cachedChunk, found := r.cache.Get(chunkKey); found {
+					if chunk, ok := cachedChunk.(*schemas.ChatStreamChunk); ok {
+						respC <- schemas.NewChatStreamChunk(
+							req.ID,
+							r.routerID,
+							req.Metadata,
+							chunk,
+						)
+					} else {
+						log.Println("Failed to cast cached chunk to ChatStreamChunk")
+					}
+				}
+			}
+
+			if entry.Complete {
+				return
+			}
+		} else {
+			log.Println("Failed to cast cached entry to StreamingCacheEntry")
+		}
+	} else {
+		streamingCacheEntry := &schemas.StreamingCacheEntry{
+			Key:            cacheKey,
+			Query:          req.Message.Content,
+			ResponseChunks: []string{},
+			Complete:       false,
+		}
+		r.cache.Set(cacheKey, streamingCacheEntry)
 	}
 
 	retryIterator := r.retry.Iterator()
@@ -165,6 +213,7 @@ func (r *LangRouter) ChatStream(
 				continue
 			}
 
+			buffer := []schemas.ChatStreamChunk{}
 			for chunkResult := range modelRespC {
 				err = chunkResult.Error()
 				if err != nil {
@@ -175,9 +224,6 @@ func (r *LangRouter) ChatStream(
 						zap.Error(err),
 					)
 
-					// It's challenging to hide an error in case of streaming chat as consumer apps
-					//  may have already used all chunks we streamed this far (e.g. showed them to their users like OpenAI UI does),
-					//  so we cannot easily restart that process from scratch
 					respC <- schemas.NewChatStreamError(
 						req.ID,
 						r.routerID,
@@ -191,25 +237,52 @@ func (r *LangRouter) ChatStream(
 				}
 
 				chunk := chunkResult.Chunk()
-
+				buffer = append(buffer, *chunk)
 				respC <- schemas.NewChatStreamChunk(
 					req.ID,
 					r.routerID,
 					req.Metadata,
 					chunk,
 				)
+
+				if len(buffer) >= 1048 { // Define bufferSize as per your requirement
+					chunkKey := fmt.Sprintf("%s-chunk-%d", cacheKey, len(buffer))
+					r.cache.Set(chunkKey, &schemas.StreamingCacheEntryChunk{
+						Key:     chunkKey,
+						Index:   len(buffer),
+						Content: *chunk,
+					})
+					streamingCacheEntry := schemas.StreamingCacheEntry{}
+					streamingCacheEntry.ResponseChunks = append(streamingCacheEntry.ResponseChunks, chunkKey)
+					buffer = buffer[:0] // Reset buffer
+					r.cache.Set(cacheKey, streamingCacheEntry)
+				}
 			}
+
+			if len(buffer) > 0 {
+				chunkKey := fmt.Sprintf("%s-chunk-%d", cacheKey, len(buffer))
+				r.cache.Set(chunkKey, &schemas.StreamingCacheEntryChunk{
+					Key:     chunkKey,
+					Index:   len(buffer),
+					Content: buffer[0], // Assuming buffer has at least one element
+				})
+				streamingCacheEntry := schemas.StreamingCacheEntry{}
+				streamingCacheEntry.ResponseChunks = append(streamingCacheEntry.ResponseChunks, chunkKey)
+				buffer = buffer[:0] // Reset buffer
+				r.cache.Set(cacheKey, streamingCacheEntry)
+			}
+
+			streamingCacheEntry := schemas.StreamingCacheEntry{}
+			streamingCacheEntry.Complete = true
+			r.cache.Set(cacheKey, streamingCacheEntry)
 
 			return
 		}
 
-		// no providers were available to handle the request,
-		//  so we have to wait a bit with a hope there is some available next time
 		r.logger.Warn("No healthy model found to serve streaming chat request, wait and retry")
 
 		err := retryIterator.WaitNext(ctx)
 		if err != nil {
-			// something has cancelled the context
 			respC <- schemas.NewChatStreamError(
 				req.ID,
 				r.routerID,
@@ -223,7 +296,6 @@ func (r *LangRouter) ChatStream(
 		}
 	}
 
-	// if we reach this part, then we are in trouble
 	r.logger.Error(
 		"No model was available to handle streaming chat request. " +
 			"Try to configure more fallback models to avoid this",
