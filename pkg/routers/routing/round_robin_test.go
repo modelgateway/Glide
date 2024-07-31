@@ -1,11 +1,10 @@
 package routing
 
 import (
+	ptesting "github.com/EinStack/glide/pkg/providers/testing"
 	"testing"
 
 	"github.com/EinStack/glide/pkg/models"
-
-	ptesting "github.com/EinStack/glide/pkg/providers/testing"
 
 	"github.com/stretchr/testify/require"
 )

@@ -1,0 +1,9 @@
+provider:
+  testprovider:
+    base_url: "https://api.example.com"
+    chat_endpoint: "/chat/completions"
+    model: "example-model"
+    api_key: "example_api_key"
+    default_params:
+      param1: "value1"
+      param2: "value2"

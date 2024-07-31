@@ -126,7 +126,7 @@ func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*sche
 	response := schemas.ChatResponse{
 		ID:        chatCompletion.ID,
 		Created:   chatCompletion.Created,
-		Provider:  providerName,
+		Provider:  ProviderOpenAI,
 		ModelName: chatCompletion.ModelName,
 		Cached:    false,
 		ModelResponse: schemas.ModelResponse{

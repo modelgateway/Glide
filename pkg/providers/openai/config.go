@@ -1,7 +1,11 @@
 package openai
 
 import (
+	"github.com/EinStack/glide/pkg/clients"
 	"github.com/EinStack/glide/pkg/config/fields"
+	"github.com/EinStack/glide/pkg/provider"
+	"github.com/EinStack/glide/pkg/providers"
+	"github.com/EinStack/glide/pkg/telemetry"
 )
 
 // Params defines OpenAI-specific model params with the specific validation of values
@@ -49,6 +53,8 @@ type Config struct {
 	DefaultParams *Params       `yaml:"default_params,omitempty" json:"default_params"`
 }
 
+var _ providers.ProviderConfig = (*Config)(nil)
+
 // DefaultConfig for OpenAI models
 func DefaultConfig() *Config {
 	defaultParams := DefaultParams()
@@ -59,6 +65,10 @@ func DefaultConfig() *Config {
 		ModelName:     "gpt-4o",
 		DefaultParams: &defaultParams,
 	}
+}
+
+func (c *Config) ToClient(tel *telemetry.Telemetry, clientConfig *clients.ClientConfig) (provider.LangProvider, error) {
+	return NewClient(c, clientConfig, tel)
 }
 
 func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {

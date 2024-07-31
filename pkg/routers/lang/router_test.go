@@ -2,6 +2,7 @@ package lang
 
 import (
 	"context"
+	ptesting "github.com/EinStack/glide/pkg/providers/testing"
 	"testing"
 	"time"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/EinStack/glide/pkg/resiliency/retry"
 
 	"github.com/EinStack/glide/pkg/api/schemas"
-	ptesting "github.com/EinStack/glide/pkg/providers/testing"
 	"github.com/EinStack/glide/pkg/routers/latency"
 	"github.com/EinStack/glide/pkg/routers/routing"
 	"github.com/EinStack/glide/pkg/telemetry"

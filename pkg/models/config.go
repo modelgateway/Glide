@@ -2,17 +2,15 @@ package models
 
 import (
 	"fmt"
-
-	"github.com/EinStack/glide/pkg/providers"
-
 	"github.com/EinStack/glide/pkg/clients"
+	"github.com/EinStack/glide/pkg/provider"
 	"github.com/EinStack/glide/pkg/resiliency/health"
 	"github.com/EinStack/glide/pkg/routers/latency"
 	"github.com/EinStack/glide/pkg/telemetry"
 )
 
 // Config defines an extra configuration for a model wrapper around a provider
-type Config[P providers.ProviderFactory] struct {
+type Config[P provider.ProviderConfig] struct {
 	ID          string                `yaml:"id" json:"id" validate:"required"`           // Model instance ID (unique in scope of the router)
 	Enabled     bool                  `yaml:"enabled" json:"enabled" validate:"required"` // Is the model enabled?
 	ErrorBudget *health.ErrorBudget   `yaml:"error_budget" json:"error_budget" swaggertype:"primitive,string"`
@@ -23,7 +21,7 @@ type Config[P providers.ProviderFactory] struct {
 	Provider P `yaml:"provider" json:"provider"`
 }
 
-func NewConfig[P providers.ProviderFactory](ID string) *Config[P] {
+func NewConfig[P provider.ProviderConfig](ID string) *Config[P] {
 	config := DefaultConfig[P]()
 
 	config.ID = ID
@@ -31,7 +29,7 @@ func NewConfig[P providers.ProviderFactory](ID string) *Config[P] {
 	return &config
 }
 
-func DefaultConfig[P providers.ProviderFactory]() Config[P] {
+func DefaultConfig[P provider.ProviderConfig]() Config[P] {
 	return Config[P]{
 		Enabled:     true,
 		Client:      clients.DefaultClientConfig(),
