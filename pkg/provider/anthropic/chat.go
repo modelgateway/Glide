@@ -133,7 +133,7 @@ func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*sche
 	response := schemas.ChatResponse{
 		ID:        anthropicResponse.ID,
 		Created:   int(time.Now().UTC().Unix()), // not provided by anthropic
-		Provider:  providerName,
+		Provider:  ProviderID,
 		ModelName: anthropicResponse.Model,
 		Cached:    false,
 		ModelResponse: schemas.ModelResponse{

@@ -1,7 +1,10 @@
 package anthropic
 
 import (
+	"github.com/EinStack/glide/pkg/clients"
 	"github.com/EinStack/glide/pkg/config/fields"
+	"github.com/EinStack/glide/pkg/provider"
+	"github.com/EinStack/glide/pkg/telemetry"
 )
 
 // Params defines OpenAI-specific model params with the specific validation of values
@@ -55,6 +58,10 @@ func DefaultConfig() *Config {
 		ModelName:     "claude-instant-1.2",
 		DefaultParams: &defaultParams,
 	}
+}
+
+func (c *Config) ToClient(tel *telemetry.Telemetry, clientConfig *clients.ClientConfig) (provider.LangProvider, error) {
+	return NewClient(c, clientConfig, tel)
 }
 
 func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
