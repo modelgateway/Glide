@@ -1,4 +1,4 @@
-package provider
+package providers
 
 import (
 	"context"
@@ -21,9 +21,7 @@ type ModelProvider interface {
 // LangProvider defines an interface a provider should fulfill to be able to serve language chat requests
 type LangProvider interface {
 	ModelProvider
-
 	SupportChatStream() bool
-
 	Chat(ctx context.Context, params *schemas.ChatParams) (*schemas.ChatResponse, error)
 	ChatStream(ctx context.Context, params *schemas.ChatParams) (clients.ChatStream, error)
 }
@@ -31,8 +29,6 @@ type LangProvider interface {
 // EmbeddingProvider defines an interface a provider should fulfill to be able to generate embeddings
 type EmbeddingProvider interface {
 	ModelProvider
-
 	SupportEmbedding() bool
-
 	Embed(ctx context.Context, params *schemas.ChatParams) (*schemas.ChatResponse, error)
 }

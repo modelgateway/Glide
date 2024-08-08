@@ -27,7 +27,7 @@ func TestRouterConfig_BuildModels(t *testing.T) {
 					Client:      clients.DefaultClientConfig(),
 					ErrorBudget: health.DefaultErrorBudget(),
 					Latency:     latency.DefaultConfig(),
-					Provider: &providers.DynLangProvider{
+					Provider: &providers.Config{
 						openai.ProviderID: &openai.Config{
 							APIKey:        "ABC",
 							DefaultParams: &defaultParams,
@@ -45,7 +45,7 @@ func TestRouterConfig_BuildModels(t *testing.T) {
 					Client:      clients.DefaultClientConfig(),
 					ErrorBudget: health.DefaultErrorBudget(),
 					Latency:     latency.DefaultConfig(),
-					Provider: &providers.DynLangProvider{
+					Provider: &providers.Config{
 						openai.ProviderID: &openai.Config{
 							APIKey:        "ABC",
 							DefaultParams: &defaultParams,
@@ -80,7 +80,7 @@ func TestRouterConfig_BuildModelsPerType(t *testing.T) {
 				Client:      clients.DefaultClientConfig(),
 				ErrorBudget: health.DefaultErrorBudget(),
 				Latency:     latency.DefaultConfig(),
-				Provider: &providers.DynLangProvider{
+				Provider: &providers.Config{
 					openai.ProviderID: &openai.Config{
 						APIKey:        "ABC",
 						DefaultParams: &openAIParams,
@@ -93,7 +93,7 @@ func TestRouterConfig_BuildModelsPerType(t *testing.T) {
 				Client:      clients.DefaultClientConfig(),
 				ErrorBudget: health.DefaultErrorBudget(),
 				Latency:     latency.DefaultConfig(),
-				Provider: &providers.DynLangProvider{
+				Provider: &providers.Config{
 					cohere.ProviderID: &cohere.Config{
 						APIKey:        "ABC",
 						DefaultParams: &cohereParams,
@@ -129,7 +129,7 @@ func TestRouterConfig_InvalidSetups(t *testing.T) {
 							Client:      clients.DefaultClientConfig(),
 							ErrorBudget: health.DefaultErrorBudget(),
 							Latency:     latency.DefaultConfig(),
-							Provider: &providers.DynLangProvider{
+							Provider: &providers.Config{
 								openai.ProviderID: &openai.Config{
 									APIKey:        "ABC",
 									DefaultParams: &defaultParams,
@@ -147,7 +147,7 @@ func TestRouterConfig_InvalidSetups(t *testing.T) {
 							Client:      clients.DefaultClientConfig(),
 							ErrorBudget: health.DefaultErrorBudget(),
 							Latency:     latency.DefaultConfig(),
-							Provider: &providers.DynLangProvider{
+							Provider: &providers.Config{
 								openai.ProviderID: &openai.Config{
 									APIKey:        "ABC",
 									DefaultParams: &defaultParams,
@@ -170,7 +170,7 @@ func TestRouterConfig_InvalidSetups(t *testing.T) {
 							Client:      clients.DefaultClientConfig(),
 							ErrorBudget: health.DefaultErrorBudget(),
 							Latency:     latency.DefaultConfig(),
-							Provider: &providers.DynLangProvider{
+							Provider: &providers.Config{
 								openai.ProviderID: &openai.Config{
 									APIKey:        "ABC",
 									DefaultParams: &defaultParams,
@@ -183,7 +183,7 @@ func TestRouterConfig_InvalidSetups(t *testing.T) {
 							Client:      clients.DefaultClientConfig(),
 							ErrorBudget: health.DefaultErrorBudget(),
 							Latency:     latency.DefaultConfig(),
-							Provider: &providers.DynLangProvider{
+							Provider: &providers.Config{
 								openai.ProviderID: &openai.Config{
 									APIKey:        "ABC",
 									DefaultParams: &defaultParams,

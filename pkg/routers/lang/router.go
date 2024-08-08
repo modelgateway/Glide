@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 
+	"github.com/EinStack/glide/pkg/extmodel"
+
 	"github.com/EinStack/glide/pkg/api/schemas"
-	"github.com/EinStack/glide/pkg/models"
 	"github.com/EinStack/glide/pkg/resiliency/retry"
 	"github.com/EinStack/glide/pkg/routers/routing"
 	"github.com/EinStack/glide/pkg/telemetry"
@@ -19,8 +20,8 @@ type RouterID = string
 type Router struct {
 	routerID          RouterID
 	Config            *RouterConfig
-	chatModels        []*models.LanguageModel
-	chatStreamModels  []*models.LanguageModel
+	chatModels        []*extmodel.LanguageModel
+	chatStreamModels  []*extmodel.LanguageModel
 	chatRouting       routing.LangModelRouting
 	chatStreamRouting routing.LangModelRouting
 	retry             *retry.ExpRetry
@@ -76,7 +77,7 @@ func (r *Router) Chat(ctx context.Context, req *schemas.ChatRequest) (*schemas.C
 				break
 			}
 
-			langModel := model.(models.LangModel)
+			langModel := model.(extmodel.LangModel)
 
 			chatParams := req.Params(langModel.ID(), langModel.ModelName())
 
@@ -146,7 +147,7 @@ func (r *Router) ChatStream(
 				break
 			}
 
-			langModel := model.(models.LangModel)
+			langModel := model.(extmodel.LangModel)
 			chatParams := req.Params(langModel.ID(), langModel.ModelName())
 
 			modelRespC, err := langModel.ChatStream(ctx, chatParams)

@@ -3,7 +3,7 @@ package openai
 import (
 	"github.com/EinStack/glide/pkg/clients"
 	"github.com/EinStack/glide/pkg/config/fields"
-	"github.com/EinStack/glide/pkg/provider"
+	"github.com/EinStack/glide/pkg/providers"
 	"github.com/EinStack/glide/pkg/telemetry"
 )
 
@@ -52,7 +52,7 @@ type Config struct {
 	DefaultParams *Params       `yaml:"default_params,omitempty" json:"default_params"`
 }
 
-var _ provider.ProviderConfig = (*Config)(nil)
+var _ providers.Configurer = (*Config)(nil)
 
 // DefaultConfig for OpenAI models
 func DefaultConfig() *Config {
@@ -66,7 +66,7 @@ func DefaultConfig() *Config {
 	}
 }
 
-func (c *Config) ToClient(tel *telemetry.Telemetry, clientConfig *clients.ClientConfig) (provider.LangProvider, error) {
+func (c *Config) ToClient(tel *telemetry.Telemetry, clientConfig *clients.ClientConfig) (providers.LangProvider, error) {
 	return NewClient(c, clientConfig, tel)
 }
 

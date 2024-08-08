@@ -3,7 +3,7 @@ package routing
 import (
 	"errors"
 
-	"github.com/EinStack/glide/pkg/models"
+	"github.com/EinStack/glide/pkg/extmodel"
 )
 
 var ErrNoHealthyModels = errors.New("no healthy models found")
@@ -16,5 +16,5 @@ type LangModelRouting interface {
 }
 
 type LangModelIterator interface {
-	Next() (models.Model, error)
+	Next() (extmodel.Interface, error)
 }

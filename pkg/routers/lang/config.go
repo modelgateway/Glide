@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/EinStack/glide/pkg/extmodel"
+
 	"github.com/EinStack/glide/pkg/providers"
 
 	"github.com/EinStack/glide/pkg/routers"
 
-	"github.com/EinStack/glide/pkg/models"
 	"github.com/EinStack/glide/pkg/resiliency/retry"
 	"github.com/EinStack/glide/pkg/routers/routing"
 	"github.com/EinStack/glide/pkg/telemetry"
@@ -17,7 +18,7 @@ import (
 )
 
 type (
-	ModelConfig     = models.Config[*providers.DynLangProvider]
+	ModelConfig     = extmodel.Config[*providers.Config]
 	ModelPoolConfig = []ModelConfig
 )
 
@@ -50,12 +51,12 @@ func NewRouterConfig(RouterID string, opt ...RouterConfigOption) *RouterConfig {
 }
 
 // BuildModels creates LanguageModel slice out of the given config
-func (c *RouterConfig) BuildModels(tel *telemetry.Telemetry) ([]*models.LanguageModel, []*models.LanguageModel, error) { //nolint: cyclop
+func (c *RouterConfig) BuildModels(tel *telemetry.Telemetry) ([]*extmodel.LanguageModel, []*extmodel.LanguageModel, error) { //nolint: cyclop
 	var errs error
 
 	seenIDs := make(map[string]bool, len(c.Models))
-	chatModels := make([]*models.LanguageModel, 0, len(c.Models))
-	chatStreamModels := make([]*models.LanguageModel, 0, len(c.Models))
+	chatModels := make([]*extmodel.LanguageModel, 0, len(c.Models))
+	chatStreamModels := make([]*extmodel.LanguageModel, 0, len(c.Models))
 
 	for _, modelConfig := range c.Models {
 		if _, ok := seenIDs[modelConfig.ID]; ok {
@@ -159,11 +160,11 @@ func (c *RouterConfig) BuildRetry() *retry.ExpRetry {
 }
 
 func (c *RouterConfig) BuildRouting(
-	chatModels []*models.LanguageModel,
-	chatStreamModels []*models.LanguageModel,
+	chatModels []*extmodel.LanguageModel,
+	chatStreamModels []*extmodel.LanguageModel,
 ) (routing.LangModelRouting, routing.LangModelRouting, error) {
-	chatModelPool := make([]models.Model, 0, len(chatModels))
-	chatStreamModelPool := make([]models.Model, 0, len(chatStreamModels))
+	chatModelPool := make([]extmodel.Interface, 0, len(chatModels))
+	chatStreamModelPool := make([]extmodel.Interface, 0, len(chatStreamModels))
 
 	for _, model := range chatModels {
 		chatModelPool = append(chatModelPool, model)
@@ -181,8 +182,8 @@ func (c *RouterConfig) BuildRouting(
 	case routing.WeightedRoundRobin:
 		return routing.NewWeightedRoundRobin(chatModelPool), routing.NewWeightedRoundRobin(chatStreamModelPool), nil
 	case routing.LeastLatency:
-		return routing.NewLeastLatencyRouting(models.ChatLatency, chatModelPool),
-			routing.NewLeastLatencyRouting(models.ChatStreamLatency, chatStreamModelPool),
+		return routing.NewLeastLatencyRouting(extmodel.ChatLatency, chatModelPool),
+			routing.NewLeastLatencyRouting(extmodel.ChatStreamLatency, chatStreamModelPool),
 			nil
 	}
 

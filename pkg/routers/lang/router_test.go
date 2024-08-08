@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	ptesting "github.com/EinStack/glide/pkg/providers/testing"
+	"github.com/EinStack/glide/pkg/providers"
 
-	"github.com/EinStack/glide/pkg/models"
+	"github.com/EinStack/glide/pkg/extmodel"
 
 	"github.com/EinStack/glide/pkg/clients"
 	"github.com/EinStack/glide/pkg/resiliency/health"
@@ -24,24 +24,24 @@ func TestLangRouter_Chat_PickFistHealthy(t *testing.T) {
 	budget := health.NewErrorBudget(3, health.SEC)
 	latConfig := latency.DefaultConfig()
 
-	langModels := []*models.LanguageModel{
-		models.NewLangModel(
+	langModels := []*extmodel.LanguageModel{
+		extmodel.NewLangModel(
 			"first",
-			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Msg: "1"}, {Msg: "2"}}),
+			providers.NewProviderMock(nil, []providers.RespMock{{Msg: "1"}, {Msg: "2"}}),
 			budget,
 			*latConfig,
 			1,
 		),
-		models.NewLangModel(
+		extmodel.NewLangModel(
 			"second",
-			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Msg: "1"}}),
+			providers.NewProviderMock(nil, []providers.RespMock{{Msg: "1"}}),
 			budget,
 			*latConfig,
 			1,
 		),
 	}
 
-	modelPool := make([]models.Model, 0, len(langModels))
+	modelPool := make([]extmodel.Interface, 0, len(langModels))
 	for _, model := range langModels {
 		modelPool = append(modelPool, model)
 	}
@@ -70,31 +70,31 @@ func TestLangRouter_Chat_PickFistHealthy(t *testing.T) {
 func TestLangRouter_Chat_PickThirdHealthy(t *testing.T) {
 	budget := health.NewErrorBudget(1, health.SEC)
 	latConfig := latency.DefaultConfig()
-	langModels := []*models.LanguageModel{
-		models.NewLangModel(
+	langModels := []*extmodel.LanguageModel{
+		extmodel.NewLangModel(
 			"first",
-			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "3"}}),
+			providers.NewProviderMock(nil, []providers.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "3"}}),
 			budget,
 			*latConfig,
 			1,
 		),
-		models.NewLangModel(
+		extmodel.NewLangModel(
 			"second",
-			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "4"}}),
+			providers.NewProviderMock(nil, []providers.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "4"}}),
 			budget,
 			*latConfig,
 			1,
 		),
-		models.NewLangModel(
+		extmodel.NewLangModel(
 			"third",
-			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Msg: "1"}, {Msg: "2"}}),
+			providers.NewProviderMock(nil, []providers.RespMock{{Msg: "1"}, {Msg: "2"}}),
 			budget,
 			*latConfig,
 			1,
 		),
 	}
 
-	modelPool := make([]models.Model, 0, len(langModels))
+	modelPool := make([]extmodel.Interface, 0, len(langModels))
 	for _, model := range langModels {
 		modelPool = append(modelPool, model)
 	}
@@ -127,24 +127,24 @@ func TestLangRouter_Chat_PickThirdHealthy(t *testing.T) {
 func TestLangRouter_Chat_SuccessOnRetry(t *testing.T) {
 	budget := health.NewErrorBudget(1, health.MILLI)
 	latConfig := latency.DefaultConfig()
-	langModels := []*models.LanguageModel{
-		models.NewLangModel(
+	langModels := []*extmodel.LanguageModel{
+		extmodel.NewLangModel(
 			"first",
-			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "2"}}),
+			providers.NewProviderMock(nil, []providers.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "2"}}),
 			budget,
 			*latConfig,
 			1,
 		),
-		models.NewLangModel(
+		extmodel.NewLangModel(
 			"second",
-			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "1"}}),
+			providers.NewProviderMock(nil, []providers.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "1"}}),
 			budget,
 			*latConfig,
 			1,
 		),
 	}
 
-	modelPool := make([]models.Model, 0, len(langModels))
+	modelPool := make([]extmodel.Interface, 0, len(langModels))
 	for _, model := range langModels {
 		modelPool = append(modelPool, model)
 	}
@@ -170,24 +170,24 @@ func TestLangRouter_Chat_SuccessOnRetry(t *testing.T) {
 func TestLangRouter_Chat_UnhealthyModelInThePool(t *testing.T) {
 	budget := health.NewErrorBudget(1, health.MIN)
 	latConfig := latency.DefaultConfig()
-	langModels := []*models.LanguageModel{
-		models.NewLangModel(
+	langModels := []*extmodel.LanguageModel{
+		extmodel.NewLangModel(
 			"first",
-			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Err: clients.ErrProviderUnavailable}, {Msg: "3"}}),
+			providers.NewProviderMock(nil, []providers.RespMock{{Err: clients.ErrProviderUnavailable}, {Msg: "3"}}),
 			budget,
 			*latConfig,
 			1,
 		),
-		models.NewLangModel(
+		extmodel.NewLangModel(
 			"second",
-			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Msg: "1"}, {Msg: "2"}}),
+			providers.NewProviderMock(nil, []providers.RespMock{{Msg: "1"}, {Msg: "2"}}),
 			budget,
 			*latConfig,
 			1,
 		),
 	}
 
-	modelPool := make([]models.Model, 0, len(langModels))
+	modelPool := make([]extmodel.Interface, 0, len(langModels))
 	for _, model := range langModels {
 		modelPool = append(modelPool, model)
 	}
@@ -215,24 +215,24 @@ func TestLangRouter_Chat_UnhealthyModelInThePool(t *testing.T) {
 func TestLangRouter_Chat_AllModelsUnavailable(t *testing.T) {
 	budget := health.NewErrorBudget(1, health.SEC)
 	latConfig := latency.DefaultConfig()
-	langModels := []*models.LanguageModel{
-		models.NewLangModel(
+	langModels := []*extmodel.LanguageModel{
+		extmodel.NewLangModel(
 			"first",
-			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Err: &schemas.ErrNoModelAvailable}}),
+			providers.NewProviderMock(nil, []providers.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Err: &schemas.ErrNoModelAvailable}}),
 			budget,
 			*latConfig,
 			1,
 		),
-		models.NewLangModel(
+		extmodel.NewLangModel(
 			"second",
-			ptesting.NewProviderMock(nil, []ptesting.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Err: &schemas.ErrNoModelAvailable}}),
+			providers.NewProviderMock(nil, []providers.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Err: &schemas.ErrNoModelAvailable}}),
 			budget,
 			*latConfig,
 			1,
 		),
 	}
 
-	modelPool := make([]models.Model, 0, len(langModels))
+	modelPool := make([]extmodel.Interface, 0, len(langModels))
 	for _, model := range langModels {
 		modelPool = append(modelPool, model)
 	}
@@ -257,11 +257,11 @@ func TestLangRouter_ChatStream(t *testing.T) {
 	budget := health.NewErrorBudget(3, health.SEC)
 	latConfig := latency.DefaultConfig()
 
-	langModels := []*models.LanguageModel{
-		models.NewLangModel(
+	langModels := []*extmodel.LanguageModel{
+		extmodel.NewLangModel(
 			"first",
-			ptesting.NewStreamProviderMock(nil, []ptesting.RespStreamMock{
-				ptesting.NewRespStreamMock(&[]ptesting.RespMock{
+			providers.NewStreamProviderMock(nil, []providers.RespStreamMock{
+				providers.NewRespStreamMock(&[]providers.RespMock{
 					{Msg: "Bill"},
 					{Msg: "Gates"},
 					{Msg: "entered"},
@@ -273,10 +273,10 @@ func TestLangRouter_ChatStream(t *testing.T) {
 			*latConfig,
 			1,
 		),
-		models.NewLangModel(
+		extmodel.NewLangModel(
 			"second",
-			ptesting.NewStreamProviderMock(nil, []ptesting.RespStreamMock{
-				ptesting.NewRespStreamMock(&[]ptesting.RespMock{
+			providers.NewStreamProviderMock(nil, []providers.RespStreamMock{
+				providers.NewRespStreamMock(&[]providers.RespMock{
 					{Msg: "Knock"},
 					{Msg: "Knock"},
 					{Msg: "joke"},
@@ -288,7 +288,7 @@ func TestLangRouter_ChatStream(t *testing.T) {
 		),
 	}
 
-	modelPool := make([]models.Model, 0, len(langModels))
+	modelPool := make([]extmodel.Interface, 0, len(langModels))
 	for _, model := range langModels {
 		modelPool = append(modelPool, model)
 	}
@@ -332,19 +332,19 @@ func TestLangRouter_ChatStream_FailOnFirst(t *testing.T) {
 	budget := health.NewErrorBudget(3, health.SEC)
 	latConfig := latency.DefaultConfig()
 
-	langModels := []*models.LanguageModel{
-		models.NewLangModel(
+	langModels := []*extmodel.LanguageModel{
+		extmodel.NewLangModel(
 			"first",
-			ptesting.NewStreamProviderMock(nil, nil),
+			providers.NewStreamProviderMock(nil, nil),
 			budget,
 			*latConfig,
 			1,
 		),
-		models.NewLangModel(
+		extmodel.NewLangModel(
 			"second",
-			ptesting.NewStreamProviderMock(nil, []ptesting.RespStreamMock{
-				ptesting.NewRespStreamMock(
-					&[]ptesting.RespMock{
+			providers.NewStreamProviderMock(nil, []providers.RespStreamMock{
+				providers.NewRespStreamMock(
+					&[]providers.RespMock{
 						{Msg: "Knock"},
 						{Msg: "knock"},
 						{Msg: "joke"},
@@ -357,7 +357,7 @@ func TestLangRouter_ChatStream_FailOnFirst(t *testing.T) {
 		),
 	}
 
-	modelPool := make([]models.Model, 0, len(langModels))
+	modelPool := make([]extmodel.Interface, 0, len(langModels))
 	for _, model := range langModels {
 		modelPool = append(modelPool, model)
 	}
@@ -401,11 +401,11 @@ func TestLangRouter_ChatStream_AllModelsUnavailable(t *testing.T) {
 	budget := health.NewErrorBudget(1, health.SEC)
 	latConfig := latency.DefaultConfig()
 
-	langModels := []*models.LanguageModel{
-		models.NewLangModel(
+	langModels := []*extmodel.LanguageModel{
+		extmodel.NewLangModel(
 			"first",
-			ptesting.NewStreamProviderMock(nil, []ptesting.RespStreamMock{
-				ptesting.NewRespStreamMock(&[]ptesting.RespMock{
+			providers.NewStreamProviderMock(nil, []providers.RespStreamMock{
+				providers.NewRespStreamMock(&[]providers.RespMock{
 					{Err: clients.ErrProviderUnavailable},
 				}),
 			}),
@@ -413,10 +413,10 @@ func TestLangRouter_ChatStream_AllModelsUnavailable(t *testing.T) {
 			*latConfig,
 			1,
 		),
-		models.NewLangModel(
+		extmodel.NewLangModel(
 			"second",
-			ptesting.NewStreamProviderMock(nil, []ptesting.RespStreamMock{
-				ptesting.NewRespStreamMock(&[]ptesting.RespMock{
+			providers.NewStreamProviderMock(nil, []providers.RespStreamMock{
+				providers.NewRespStreamMock(&[]providers.RespMock{
 					{Err: clients.ErrProviderUnavailable},
 				}),
 			}),
@@ -426,7 +426,7 @@ func TestLangRouter_ChatStream_AllModelsUnavailable(t *testing.T) {
 		),
 	}
 
-	modelPool := make([]models.Model, 0, len(langModels))
+	modelPool := make([]extmodel.Interface, 0, len(langModels))
 	for _, model := range langModels {
 		modelPool = append(modelPool, model)
 	}

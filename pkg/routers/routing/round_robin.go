@@ -3,7 +3,7 @@ package routing
 import (
 	"sync/atomic"
 
-	"github.com/EinStack/glide/pkg/models"
+	"github.com/EinStack/glide/pkg/extmodel"
 )
 
 const (
@@ -13,10 +13,10 @@ const (
 // RoundRobinRouting routes request to the next model in the list in cycle
 type RoundRobinRouting struct {
 	idx    atomic.Uint64
-	models []models.Model
+	models []extmodel.Interface
 }
 
-func NewRoundRobinRouting(models []models.Model) *RoundRobinRouting {
+func NewRoundRobinRouting(models []extmodel.Interface) *RoundRobinRouting {
 	return &RoundRobinRouting{
 		models: models,
 	}
@@ -26,7 +26,7 @@ func (r *RoundRobinRouting) Iterator() LangModelIterator {
 	return r
 }
 
-func (r *RoundRobinRouting) Next() (models.Model, error) {
+func (r *RoundRobinRouting) Next() (extmodel.Interface, error) {
 	modelLen := len(r.models)
 
 	// in order to avoid infinite loop in case of no healthy model is available,

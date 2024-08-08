@@ -3,7 +3,7 @@ package routing
 import (
 	"sync/atomic"
 
-	"github.com/EinStack/glide/pkg/models"
+	"github.com/EinStack/glide/pkg/extmodel"
 )
 
 const (
@@ -15,10 +15,10 @@ const (
 //	Priority of models are defined as position of the model on the list
 //	(e.g. the first model definition has the highest priority, then the second model definition and so on)
 type PriorityRouting struct {
-	models []models.Model
+	models []extmodel.Interface
 }
 
-func NewPriority(models []models.Model) *PriorityRouting {
+func NewPriority(models []extmodel.Interface) *PriorityRouting {
 	return &PriorityRouting{
 		models: models,
 	}
@@ -35,10 +35,10 @@ func (r *PriorityRouting) Iterator() LangModelIterator {
 
 type PriorityIterator struct {
 	idx    *atomic.Uint64
-	models []models.Model
+	models []extmodel.Interface
 }
 
-func (r PriorityIterator) Next() (models.Model, error) {
+func (r PriorityIterator) Next() (extmodel.Interface, error) {
 	modelPool := r.models
 
 	for idx := int(r.idx.Load()); idx < len(modelPool); idx = int(r.idx.Add(1)) {

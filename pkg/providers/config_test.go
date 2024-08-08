@@ -5,19 +5,18 @@ import (
 	"path/filepath"
 	"testing"
 
-	testprovider "github.com/EinStack/glide/pkg/providers/testing"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 )
 
 func TestDynLangProvider(t *testing.T) {
-	LangRegistry.Register(testprovider.ProviderTest, &testprovider.Config{})
+	LangRegistry.Register(ProviderTest, &TestConfig{})
 
 	type ProviderConfig struct {
-		Provider *DynLangProvider `yaml:"provider"`
+		Provider *Config `yaml:"provider"`
 	}
 
-	prConfig := make(DynLangProvider)
+	prConfig := make(Config)
 	providerConfig := ProviderConfig{
 		Provider: &prConfig,
 	}

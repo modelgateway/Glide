@@ -3,7 +3,7 @@ package routing
 import (
 	"sync"
 
-	"github.com/EinStack/glide/pkg/models"
+	"github.com/EinStack/glide/pkg/extmodel"
 )
 
 const (
@@ -11,7 +11,7 @@ const (
 )
 
 type Weighter struct {
-	model         models.Model
+	model         extmodel.Interface
 	currentWeight int
 }
 
@@ -36,7 +36,7 @@ type WRoundRobinRouting struct {
 	weights []*Weighter
 }
 
-func NewWeightedRoundRobin(models []models.Model) *WRoundRobinRouting {
+func NewWeightedRoundRobin(models []extmodel.Interface) *WRoundRobinRouting {
 	weights := make([]*Weighter, 0, len(models))
 
 	for _, model := range models {
@@ -55,7 +55,7 @@ func (r *WRoundRobinRouting) Iterator() LangModelIterator {
 	return r
 }
 
-func (r *WRoundRobinRouting) Next() (models.Model, error) {
+func (r *WRoundRobinRouting) Next() (extmodel.Interface, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

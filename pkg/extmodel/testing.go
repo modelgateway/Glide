@@ -1,10 +1,9 @@
-package testing
+package extmodel
 
 import (
 	"time"
 
 	"github.com/EinStack/glide/pkg/config/fields"
-	"github.com/EinStack/glide/pkg/models"
 	"github.com/EinStack/glide/pkg/routers/latency"
 )
 
@@ -53,6 +52,6 @@ func (m LangModelMock) Weight() int {
 	return m.weight
 }
 
-func ChatMockLatency(model models.Model) *latency.MovingAverage {
+func ChatMockLatency(model Interface) *latency.MovingAverage {
 	return model.(LangModelMock).chatLatency
 }

@@ -2,23 +2,21 @@ package providers
 
 import (
 	"fmt"
-
-	"github.com/EinStack/glide/pkg/provider"
 )
 
 var LangRegistry = NewProviderRegistry()
 
 type ProviderRegistry struct {
-	providers map[provider.ProviderID]provider.ProviderConfig
+	providers map[ProviderID]Configurer
 }
 
 func NewProviderRegistry() *ProviderRegistry {
 	return &ProviderRegistry{
-		providers: make(map[provider.ProviderID]provider.ProviderConfig),
+		providers: make(map[ProviderID]Configurer),
 	}
 }
 
-func (r *ProviderRegistry) Register(name provider.ProviderID, config provider.ProviderConfig) {
+func (r *ProviderRegistry) Register(name ProviderID, config Configurer) {
 	if _, ok := r.Get(name); ok {
 		panic(fmt.Sprintf("provider %s is already registered", name))
 	}
@@ -26,14 +24,14 @@ func (r *ProviderRegistry) Register(name provider.ProviderID, config provider.Pr
 	r.providers[name] = config
 }
 
-func (r *ProviderRegistry) Get(name provider.ProviderID) (provider.ProviderConfig, bool) {
+func (r *ProviderRegistry) Get(name ProviderID) (Configurer, bool) {
 	config, ok := r.providers[name]
 
 	return config, ok
 }
 
-func (r *ProviderRegistry) Available() []provider.ProviderID {
-	available := make([]provider.ProviderID, 0, len(r.providers))
+func (r *ProviderRegistry) Available() []ProviderID {
+	available := make([]ProviderID, 0, len(r.providers))
 
 	for providerID := range r.providers {
 		available = append(available, providerID)

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/EinStack/glide/pkg/provider"
 	"github.com/go-playground/validator/v10"
 
 	"gopkg.in/yaml.v3"
@@ -22,12 +21,17 @@ func init() {
 	validate = validator.New()
 }
 
-// TODO: rename DynLangProvider to DynLangProviderConfig
-type DynLangProvider map[provider.ProviderID]interface{}
+// TODO: Configurer should be more generic, not tied to LangProviders
+type Configurer interface {
+	UnmarshalYAML(unmarshal func(interface{}) error) error
+	ToClient(tel *telemetry.Telemetry, clientConfig *clients.ClientConfig) (LangProvider, error)
+}
 
-var _ provider.ProviderConfig = (*DynLangProvider)(nil)
+type Config map[ProviderID]interface{}
 
-func (p DynLangProvider) ToClient(tel *telemetry.Telemetry, clientConfig *clients.ClientConfig) (provider.LangProvider, error) {
+var _ Configurer = (*Config)(nil)
+
+func (p Config) ToClient(tel *telemetry.Telemetry, clientConfig *clients.ClientConfig) (LangProvider, error) {
 	for providerID, configValue := range p {
 		if configValue == nil {
 			continue
@@ -60,12 +64,12 @@ func (p DynLangProvider) ToClient(tel *telemetry.Telemetry, clientConfig *client
 		return providerConfig.ToClient(tel, clientConfig)
 	}
 
-	return nil, provider.ErrProviderNotFound
+	return nil, ErrProviderNotFound
 }
 
 // validate ensure there is only one provider configured and it's supported by Glide
-func (p DynLangProvider) validate() error {
-	configuredProviders := make([]provider.ProviderID, 0, len(p))
+func (p Config) validate() error {
+	configuredProviders := make([]ProviderID, 0, len(p))
 
 	for providerID, config := range p {
 		if config != nil {
@@ -115,8 +119,8 @@ func (p DynLangProvider) validate() error {
 	return providerConfig.UnmarshalYAML(providerConfigUnmarshaller)
 }
 
-func (p *DynLangProvider) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type plain DynLangProvider // to avoid recursion
+func (p *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type plain Config // to avoid recursion
 
 	temp := plain{}
 
@@ -124,7 +128,7 @@ func (p *DynLangProvider) UnmarshalYAML(unmarshal func(interface{}) error) error
 		return err
 	}
 
-	*p = DynLangProvider(temp)
+	*p = Config(temp)
 
 	return p.validate()
 }

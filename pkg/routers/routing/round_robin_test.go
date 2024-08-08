@@ -3,9 +3,7 @@ package routing
 import (
 	"testing"
 
-	ptesting "github.com/EinStack/glide/pkg/providers/testing"
-
-	"github.com/EinStack/glide/pkg/models"
+	"github.com/EinStack/glide/pkg/extmodel"
 
 	"github.com/stretchr/testify/require"
 )
@@ -30,10 +28,10 @@ func TestRoundRobinRouting_PickModelsSequentially(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			modelPool := make([]models.Model, 0, len(tc.models))
+			modelPool := make([]extmodel.Interface, 0, len(tc.models))
 
 			for _, model := range tc.models {
-				modelPool = append(modelPool, ptesting.NewLangModelMock(model.modelID, model.healthy, 100, 1))
+				modelPool = append(modelPool, extmodel.NewLangModelMock(model.modelID, model.healthy, 100, 1))
 			}
 
 			routing := NewRoundRobinRouting(modelPool)
@@ -52,10 +50,10 @@ func TestRoundRobinRouting_PickModelsSequentially(t *testing.T) {
 }
 
 func TestRoundRobinRouting_NoHealthyModels(t *testing.T) {
-	modelPool := []models.Model{
-		ptesting.NewLangModelMock("first", false, 0, 1),
-		ptesting.NewLangModelMock("second", false, 0, 1),
-		ptesting.NewLangModelMock("third", false, 0, 1),
+	modelPool := []extmodel.Interface{
+		extmodel.NewLangModelMock("first", false, 0, 1),
+		extmodel.NewLangModelMock("second", false, 0, 1),
+		extmodel.NewLangModelMock("third", false, 0, 1),
 	}
 
 	routing := NewRoundRobinRouting(modelPool)

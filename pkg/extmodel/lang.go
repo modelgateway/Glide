@@ -1,11 +1,11 @@
-package models
+package extmodel
 
 import (
 	"context"
 	"io"
 	"time"
 
-	"github.com/EinStack/glide/pkg/provider"
+	"github.com/EinStack/glide/pkg/providers"
 
 	"github.com/EinStack/glide/pkg/clients"
 	health2 "github.com/EinStack/glide/pkg/resiliency/health"
@@ -18,7 +18,7 @@ import (
 )
 
 type LangModel interface {
-	Model
+	Interface
 	Provider() string
 	ModelName() string
 	Chat(ctx context.Context, params *schemas.ChatParams) (*schemas.ChatResponse, error)
@@ -32,14 +32,14 @@ type LangModel interface {
 type LanguageModel struct {
 	modelID               string
 	weight                int
-	client                provider.LangProvider
+	client                providers.LangProvider
 	healthTracker         *health2.Tracker
 	chatLatency           *latency.MovingAverage
 	chatStreamLatency     *latency.MovingAverage
 	latencyUpdateInterval *fields.Duration
 }
 
-func NewLangModel(modelID string, client provider.LangProvider, budget *health2.ErrorBudget, latencyConfig latency.Config, weight int) *LanguageModel {
+func NewLangModel(modelID string, client providers.LangProvider, budget *health2.ErrorBudget, latencyConfig latency.Config, weight int) *LanguageModel {
 	return &LanguageModel{
 		modelID:               modelID,
 		client:                client,
@@ -170,10 +170,10 @@ func (m *LanguageModel) ModelName() string {
 	return m.client.ModelName()
 }
 
-func ChatLatency(model Model) *latency.MovingAverage {
+func ChatLatency(model Interface) *latency.MovingAverage {
 	return model.(LanguageModel).ChatLatency()
 }
 
-func ChatStreamLatency(model Model) *latency.MovingAverage {
+func ChatStreamLatency(model Interface) *latency.MovingAverage {
 	return model.(LanguageModel).ChatStreamLatency()
 }

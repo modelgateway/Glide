@@ -5,9 +5,7 @@ import (
 	"testing"
 	"time"
 
-	ptesting "github.com/EinStack/glide/pkg/providers/testing"
-
-	"github.com/EinStack/glide/pkg/models"
+	"github.com/EinStack/glide/pkg/extmodel"
 
 	"github.com/stretchr/testify/require"
 )
@@ -33,13 +31,13 @@ func TestLeastLatencyRouting_Warmup(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			modelPool := make([]models.Model, 0, len(tc.models))
+			modelPool := make([]extmodel.Interface, 0, len(tc.models))
 
 			for _, model := range tc.models {
-				modelPool = append(modelPool, ptesting.NewLangModelMock(model.modelID, model.healthy, model.latency, 1))
+				modelPool = append(modelPool, extmodel.NewLangModelMock(model.modelID, model.healthy, model.latency, 1))
 			}
 
-			routing := NewLeastLatencyRouting(ptesting.ChatMockLatency, modelPool)
+			routing := NewLeastLatencyRouting(extmodel.ChatMockLatency, modelPool)
 			iterator := routing.Iterator()
 
 			// loop three times over the whole pool to check if we return back to the begging of the list
@@ -107,7 +105,7 @@ func TestLeastLatencyRouting_Routing(t *testing.T) {
 
 			for _, model := range tc.models {
 				schedules = append(schedules, &ModelSchedule{
-					model: ptesting.NewLangModelMock(
+					model: extmodel.NewLangModelMock(
 						model.modelID,
 						model.healthy,
 						model.latency,
@@ -118,7 +116,7 @@ func TestLeastLatencyRouting_Routing(t *testing.T) {
 			}
 
 			routing := LeastLatencyRouting{
-				latencyGetter: ptesting.ChatMockLatency,
+				latencyGetter: extmodel.ChatMockLatency,
 				schedules:     schedules,
 			}
 
@@ -144,13 +142,13 @@ func TestLeastLatencyRouting_NoHealthyModels(t *testing.T) {
 
 	for name, latencies := range tests {
 		t.Run(name, func(t *testing.T) {
-			modelPool := make([]models.Model, 0, len(latencies))
+			modelPool := make([]extmodel.Interface, 0, len(latencies))
 
 			for idx, latency := range latencies {
-				modelPool = append(modelPool, ptesting.NewLangModelMock(strconv.Itoa(idx), false, latency, 1))
+				modelPool = append(modelPool, extmodel.NewLangModelMock(strconv.Itoa(idx), false, latency, 1))
 			}
 
-			routing := NewLeastLatencyRouting(models.ChatLatency, modelPool)
+			routing := NewLeastLatencyRouting(extmodel.ChatLatency, modelPool)
 			iterator := routing.Iterator()
 
 			_, err := iterator.Next()

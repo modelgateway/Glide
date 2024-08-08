@@ -1,13 +1,35 @@
-package testing
+package providers
 
 import (
 	"context"
 	"io"
 
-	clients2 "github.com/EinStack/glide/pkg/clients"
-
 	"github.com/EinStack/glide/pkg/api/schemas"
+	"github.com/EinStack/glide/pkg/clients"
+	"github.com/EinStack/glide/pkg/config/fields"
+	"github.com/EinStack/glide/pkg/telemetry"
 )
+
+const (
+	ProviderTest = "testprovider"
+)
+
+type TestConfig struct {
+	BaseURL      string        `yaml:"base_url" json:"base_url" validate:"required"`
+	ChatEndpoint string        `yaml:"chat_endpoint" json:"chat_endpoint" validate:"required"`
+	ModelName    string        `yaml:"model" json:"model" validate:"required"`
+	APIKey       fields.Secret `yaml:"api_key" json:"-" validate:"required"`
+}
+
+func (c *TestConfig) ToClient(_ *telemetry.Telemetry, _ *clients.ClientConfig) (LangProvider, error) {
+	return NewProviderMock(nil, []RespMock{}), nil
+}
+
+func (c *TestConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type plain TestConfig // to avoid recursion
+
+	return unmarshal((*plain)(c))
+}
 
 // RespMock mocks a chat response or a streaming chat chunk
 type RespMock struct {
@@ -124,7 +146,7 @@ func (c *ProviderMock) SupportChatStream() bool {
 
 func (c *ProviderMock) Chat(_ context.Context, _ *schemas.ChatParams) (*schemas.ChatResponse, error) {
 	if c.chatResps == nil {
-		return nil, clients2.ErrProviderUnavailable
+		return nil, clients.ErrProviderUnavailable
 	}
 
 	responses := *c.chatResps
@@ -139,9 +161,9 @@ func (c *ProviderMock) Chat(_ context.Context, _ *schemas.ChatParams) (*schemas.
 	return response.Resp(), nil
 }
 
-func (c *ProviderMock) ChatStream(_ context.Context, _ *schemas.ChatParams) (clients2.ChatStream, error) {
+func (c *ProviderMock) ChatStream(_ context.Context, _ *schemas.ChatParams) (clients.ChatStream, error) {
 	if c.chatStreams == nil || c.idx >= len(*c.chatStreams) {
-		return nil, clients2.ErrProviderUnavailable
+		return nil, clients.ErrProviderUnavailable
 	}
 
 	streams := *c.chatStreams
