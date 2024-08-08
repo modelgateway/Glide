@@ -1,10 +1,11 @@
 package routing
 
 import (
-	ptesting "github.com/EinStack/glide/pkg/providers/testing"
 	"strconv"
 	"testing"
 	"time"
+
+	ptesting "github.com/EinStack/glide/pkg/providers/testing"
 
 	"github.com/EinStack/glide/pkg/models"
 

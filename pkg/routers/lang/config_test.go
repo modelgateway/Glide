@@ -27,7 +27,7 @@ func TestRouterConfig_BuildModels(t *testing.T) {
 					Client:      clients.DefaultClientConfig(),
 					ErrorBudget: health.DefaultErrorBudget(),
 					Latency:     latency.DefaultConfig(),
-					Provider: providers.DynLangProvider{
+					Provider: &providers.DynLangProvider{
 						openai.ProviderOpenAI: &openai.Config{
 							APIKey:        "ABC",
 							DefaultParams: &defaultParams,
@@ -45,7 +45,7 @@ func TestRouterConfig_BuildModels(t *testing.T) {
 					Client:      clients.DefaultClientConfig(),
 					ErrorBudget: health.DefaultErrorBudget(),
 					Latency:     latency.DefaultConfig(),
-					Provider: providers.DynLangProvider{
+					Provider: &providers.DynLangProvider{
 						openai.ProviderOpenAI: &openai.Config{
 							APIKey:        "ABC",
 							DefaultParams: &defaultParams,
@@ -80,7 +80,7 @@ func TestRouterConfig_BuildModelsPerType(t *testing.T) {
 				Client:      clients.DefaultClientConfig(),
 				ErrorBudget: health.DefaultErrorBudget(),
 				Latency:     latency.DefaultConfig(),
-				Provider: providers.DynLangProvider{
+				Provider: &providers.DynLangProvider{
 					openai.ProviderOpenAI: &openai.Config{
 						APIKey:        "ABC",
 						DefaultParams: &openAIParams,

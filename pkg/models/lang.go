@@ -2,9 +2,10 @@ package models
 
 import (
 	"context"
-	"github.com/EinStack/glide/pkg/provider"
 	"io"
 	"time"
+
+	"github.com/EinStack/glide/pkg/provider"
 
 	"github.com/EinStack/glide/pkg/clients"
 	health2 "github.com/EinStack/glide/pkg/resiliency/health"

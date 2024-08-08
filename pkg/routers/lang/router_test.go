@@ -2,9 +2,10 @@ package lang
 
 import (
 	"context"
-	ptesting "github.com/EinStack/glide/pkg/providers/testing"
 	"testing"
 	"time"
+
+	ptesting "github.com/EinStack/glide/pkg/providers/testing"
 
 	"github.com/EinStack/glide/pkg/models"
 

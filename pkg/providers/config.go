@@ -3,9 +3,10 @@ package providers
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/EinStack/glide/pkg/provider"
 	"github.com/go-playground/validator/v10"
-	"strings"
 
 	"gopkg.in/yaml.v3"
 
@@ -44,7 +45,6 @@ func (p DynLangProvider) ToClient(tel *telemetry.Telemetry, clientConfig *client
 
 		providerConfigUnmarshaller := func(providerConfig interface{}) error {
 			providerConfigBytes, err := yaml.Marshal(configValue)
-
 			if err != nil {
 				return err
 			}
@@ -53,7 +53,6 @@ func (p DynLangProvider) ToClient(tel *telemetry.Telemetry, clientConfig *client
 		}
 
 		err := providerConfig.UnmarshalYAML(providerConfigUnmarshaller)
-
 		if err != nil {
 			return nil, err
 		}
@@ -105,7 +104,6 @@ func (p DynLangProvider) validate() error {
 		}
 
 		err = yaml.Unmarshal(providerConfigBytes, providerConfig)
-
 		if err != nil {
 			return err
 		}

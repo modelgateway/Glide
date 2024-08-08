@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+
 	"github.com/EinStack/glide/pkg/clients"
 	"github.com/EinStack/glide/pkg/provider"
 	"github.com/EinStack/glide/pkg/resiliency/health"

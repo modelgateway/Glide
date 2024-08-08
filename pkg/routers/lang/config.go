@@ -2,8 +2,9 @@ package lang
 
 import (
 	"fmt"
-	"github.com/EinStack/glide/pkg/providers"
 	"time"
+
+	"github.com/EinStack/glide/pkg/providers"
 
 	"github.com/EinStack/glide/pkg/routers"
 
@@ -16,7 +17,7 @@ import (
 )
 
 type (
-	ModelConfig     = models.Config[providers.DynLangProvider]
+	ModelConfig     = models.Config[*providers.DynLangProvider]
 	ModelPoolConfig = []ModelConfig
 )
 

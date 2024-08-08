@@ -2,6 +2,7 @@ package providers
 
 import (
 	"fmt"
+
 	"github.com/EinStack/glide/pkg/provider"
 )
 
@@ -34,7 +35,7 @@ func (r *ProviderRegistry) Get(name provider.ProviderID) (provider.ProviderConfi
 func (r *ProviderRegistry) Available() []provider.ProviderID {
 	available := make([]provider.ProviderID, 0, len(r.providers))
 
-	for providerID, _ := range r.providers {
+	for providerID := range r.providers {
 		available = append(available, providerID)
 	}
 

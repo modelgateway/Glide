@@ -1,12 +1,13 @@
 package providers
 
 import (
-	testprovider "github.com/EinStack/glide/pkg/providers/testing"
-	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"testing"
+
+	testprovider "github.com/EinStack/glide/pkg/providers/testing"
+	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 )
 
 func TestDynLangProvider(t *testing.T) {

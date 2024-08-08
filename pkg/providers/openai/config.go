@@ -4,7 +4,6 @@ import (
 	"github.com/EinStack/glide/pkg/clients"
 	"github.com/EinStack/glide/pkg/config/fields"
 	"github.com/EinStack/glide/pkg/provider"
-	"github.com/EinStack/glide/pkg/providers"
 	"github.com/EinStack/glide/pkg/telemetry"
 )
 
@@ -53,7 +52,7 @@ type Config struct {
 	DefaultParams *Params       `yaml:"default_params,omitempty" json:"default_params"`
 }
 
-var _ providers.ProviderConfig = (*Config)(nil)
+var _ provider.ProviderConfig = (*Config)(nil)
 
 // DefaultConfig for OpenAI models
 func DefaultConfig() *Config {
