@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	providerName = "cohere"
+	ProviderID = "cohere"
 )
 
 // Client is a client for accessing Cohere API
@@ -54,7 +54,7 @@ func NewClient(providerConfig *Config, clientConfig *clients.ClientConfig, tel *
 }
 
 func (c *Client) Provider() string {
-	return providerName
+	return ProviderID
 }
 
 func (c *Client) ModelName() string {

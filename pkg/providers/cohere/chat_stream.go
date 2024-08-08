@@ -90,7 +90,7 @@ func (s *ChatStream) Recv() (*schemas.ChatStreamChunk, error) {
 		if err != nil {
 			s.tel.L().Warn(
 				"Chat stream is unexpectedly disconnected",
-				zap.String("provider", providerName),
+				zap.String("provider", ProviderID),
 				zap.Error(err),
 			)
 
@@ -101,7 +101,7 @@ func (s *ChatStream) Recv() (*schemas.ChatStreamChunk, error) {
 
 		s.tel.L().Debug(
 			"Raw chat stream chunk",
-			zap.String("provider", providerName),
+			zap.String("provider", ProviderID),
 			zap.ByteString("rawChunk", rawChunk),
 		)
 
@@ -119,7 +119,7 @@ func (s *ChatStream) Recv() (*schemas.ChatStreamChunk, error) {
 		if responseChunk.EventType != TextGenEvent && responseChunk.EventType != StreamEndEvent {
 			s.tel.L().Debug(
 				"Unsupported stream chunk type, skipping it",
-				zap.String("provider", providerName),
+				zap.String("provider", ProviderID),
 				zap.ByteString("chunk", rawChunk),
 			)
 
@@ -132,7 +132,7 @@ func (s *ChatStream) Recv() (*schemas.ChatStreamChunk, error) {
 			// TODO: use objectpool here
 			return &schemas.ChatStreamChunk{
 				Cached:    false,
-				Provider:  providerName,
+				Provider:  ProviderID,
 				ModelName: s.modelName,
 				ModelResponse: schemas.ModelChunkResponse{
 					Metadata: &schemas.Metadata{
@@ -151,7 +151,7 @@ func (s *ChatStream) Recv() (*schemas.ChatStreamChunk, error) {
 		// TODO: use objectpool here
 		return &schemas.ChatStreamChunk{
 			Cached:    false,
-			Provider:  providerName,
+			Provider:  ProviderID,
 			ModelName: s.modelName,
 			ModelResponse: schemas.ModelChunkResponse{
 				Metadata: &schemas.Metadata{

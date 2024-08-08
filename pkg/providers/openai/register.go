@@ -5,5 +5,5 @@ import (
 )
 
 func init() {
-	providers.LangRegistry.Register(ProviderOpenAI, &Config{})
+	providers.LangRegistry.Register(ProviderID, &Config{})
 }

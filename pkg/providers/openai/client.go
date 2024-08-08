@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	ProviderOpenAI = "openai"
+	ProviderID = "openai"
 )
 
 // Client is a client for accessing OpenAI API
@@ -37,7 +37,7 @@ func NewClient(providerConfig *Config, clientConfig *clients.ClientConfig, tel *
 	}
 
 	logger := tel.L().With(
-		zap.String("provider", ProviderOpenAI),
+		zap.String("provider", ProviderID),
 	)
 
 	c := &Client{
@@ -62,7 +62,7 @@ func NewClient(providerConfig *Config, clientConfig *clients.ClientConfig, tel *
 }
 
 func (c *Client) Provider() string {
-	return ProviderOpenAI
+	return ProviderID
 }
 
 func (c *Client) ModelName() string {

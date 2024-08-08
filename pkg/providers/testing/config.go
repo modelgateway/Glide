@@ -18,7 +18,7 @@ type Config struct {
 	APIKey       fields.Secret `yaml:"api_key" json:"-" validate:"required"`
 }
 
-func (c *Config) ToClient(tel *telemetry.Telemetry, clientConfig *clients.ClientConfig) (provider.LangProvider, error) {
+func (c *Config) ToClient(_ *telemetry.Telemetry, _ *clients.ClientConfig) (provider.LangProvider, error) {
 	return NewProviderMock(nil, []RespMock{}), nil
 }
 

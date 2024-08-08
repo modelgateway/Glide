@@ -28,7 +28,7 @@ func (m *ErrorMapper) Map(resp *http.Response) error {
 	if err != nil {
 		m.tel.Logger.Error(
 			"Failed to unmarshal chat response error",
-			zap.String("provider", providerName),
+			zap.String("provider", ProviderID),
 			zap.Error(err),
 			zap.ByteString("rawResponse", bodyBytes),
 		)
@@ -38,7 +38,7 @@ func (m *ErrorMapper) Map(resp *http.Response) error {
 
 	m.tel.Logger.Error(
 		"Chat request failed",
-		zap.String("provider", providerName),
+		zap.String("provider", ProviderID),
 		zap.Int("statusCode", resp.StatusCode),
 		zap.String("response", string(bodyBytes)),
 		zap.Any("headers", resp.Header),

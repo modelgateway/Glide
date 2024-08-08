@@ -118,7 +118,7 @@ func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*sche
 	response := schemas.ChatResponse{
 		ID:        cohereCompletion.ResponseID,
 		Created:   int(time.Now().UTC().Unix()), // Cohere doesn't provide this
-		Provider:  providerName,
+		Provider:  ProviderID,
 		ModelName: c.config.ModelName,
 		Cached:    false,
 		ModelResponse: schemas.ModelResponse{
