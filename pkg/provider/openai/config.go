@@ -52,7 +52,10 @@ type Config struct {
 	DefaultParams *Params       `yaml:"default_params,omitempty" json:"default_params"`
 }
 
-var _ provider.Configurer = (*Config)(nil)
+// ensure interfaces
+var (
+	_ provider.Configurer = (*Config)(nil)
+)
 
 // DefaultConfig for OpenAI models
 func DefaultConfig() *Config {
