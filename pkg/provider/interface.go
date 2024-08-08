@@ -1,4 +1,4 @@
-package providers
+package provider
 
 import (
 	"context"
@@ -10,11 +10,11 @@ import (
 
 var ErrProviderNotFound = errors.New("provider not found")
 
-type ProviderID = string
+type ID = string
 
 // ModelProvider exposes provider context
 type ModelProvider interface {
-	Provider() ProviderID
+	Provider() ID
 	ModelName() string
 }
 

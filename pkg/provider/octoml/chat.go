@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/EinStack/glide/pkg/providers/openai"
+	"github.com/EinStack/glide/pkg/provider/openai"
 
 	"github.com/EinStack/glide/pkg/api/schemas"
 

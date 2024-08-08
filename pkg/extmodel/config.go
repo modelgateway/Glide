@@ -3,7 +3,7 @@ package extmodel
 import (
 	"fmt"
 
-	"github.com/EinStack/glide/pkg/providers"
+	"github.com/EinStack/glide/pkg/provider"
 
 	"github.com/EinStack/glide/pkg/clients"
 	"github.com/EinStack/glide/pkg/resiliency/health"
@@ -12,7 +12,7 @@ import (
 )
 
 // Config defines an extra configuration for a model wrapper around a provider
-type Config[P providers.Configurer] struct {
+type Config[P provider.Configurer] struct {
 	ID          string                `yaml:"id" json:"id" validate:"required"`           // Model instance ID (unique in scope of the router)
 	Enabled     bool                  `yaml:"enabled" json:"enabled" validate:"required"` // Is the model enabled?
 	ErrorBudget *health.ErrorBudget   `yaml:"error_budget" json:"error_budget" swaggertype:"primitive,string"`
@@ -23,7 +23,7 @@ type Config[P providers.Configurer] struct {
 	Provider P `yaml:"provider" json:"provider"`
 }
 
-func NewConfig[P providers.Configurer](ID string) *Config[P] {
+func NewConfig[P provider.Configurer](ID string) *Config[P] {
 	config := DefaultConfig[P]()
 
 	config.ID = ID
@@ -31,7 +31,7 @@ func NewConfig[P providers.Configurer](ID string) *Config[P] {
 	return &config
 }
 
-func DefaultConfig[P providers.Configurer]() Config[P] {
+func DefaultConfig[P provider.Configurer]() Config[P] {
 	return Config[P]{
 		Enabled:     true,
 		Client:      clients.DefaultClientConfig(),

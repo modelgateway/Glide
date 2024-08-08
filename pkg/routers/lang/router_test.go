@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/EinStack/glide/pkg/providers"
+	"github.com/EinStack/glide/pkg/provider"
 
 	"github.com/EinStack/glide/pkg/extmodel"
 
@@ -27,14 +27,14 @@ func TestLangRouter_Chat_PickFistHealthy(t *testing.T) {
 	langModels := []*extmodel.LanguageModel{
 		extmodel.NewLangModel(
 			"first",
-			providers.NewProviderMock(nil, []providers.RespMock{{Msg: "1"}, {Msg: "2"}}),
+			provider.NewMock(nil, []provider.RespMock{{Msg: "1"}, {Msg: "2"}}),
 			budget,
 			*latConfig,
 			1,
 		),
 		extmodel.NewLangModel(
 			"second",
-			providers.NewProviderMock(nil, []providers.RespMock{{Msg: "1"}}),
+			provider.NewMock(nil, []provider.RespMock{{Msg: "1"}}),
 			budget,
 			*latConfig,
 			1,
@@ -73,21 +73,21 @@ func TestLangRouter_Chat_PickThirdHealthy(t *testing.T) {
 	langModels := []*extmodel.LanguageModel{
 		extmodel.NewLangModel(
 			"first",
-			providers.NewProviderMock(nil, []providers.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "3"}}),
+			provider.NewMock(nil, []provider.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "3"}}),
 			budget,
 			*latConfig,
 			1,
 		),
 		extmodel.NewLangModel(
 			"second",
-			providers.NewProviderMock(nil, []providers.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "4"}}),
+			provider.NewMock(nil, []provider.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "4"}}),
 			budget,
 			*latConfig,
 			1,
 		),
 		extmodel.NewLangModel(
 			"third",
-			providers.NewProviderMock(nil, []providers.RespMock{{Msg: "1"}, {Msg: "2"}}),
+			provider.NewMock(nil, []provider.RespMock{{Msg: "1"}, {Msg: "2"}}),
 			budget,
 			*latConfig,
 			1,
@@ -130,14 +130,14 @@ func TestLangRouter_Chat_SuccessOnRetry(t *testing.T) {
 	langModels := []*extmodel.LanguageModel{
 		extmodel.NewLangModel(
 			"first",
-			providers.NewProviderMock(nil, []providers.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "2"}}),
+			provider.NewMock(nil, []provider.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "2"}}),
 			budget,
 			*latConfig,
 			1,
 		),
 		extmodel.NewLangModel(
 			"second",
-			providers.NewProviderMock(nil, []providers.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "1"}}),
+			provider.NewMock(nil, []provider.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "1"}}),
 			budget,
 			*latConfig,
 			1,
@@ -173,14 +173,14 @@ func TestLangRouter_Chat_UnhealthyModelInThePool(t *testing.T) {
 	langModels := []*extmodel.LanguageModel{
 		extmodel.NewLangModel(
 			"first",
-			providers.NewProviderMock(nil, []providers.RespMock{{Err: clients.ErrProviderUnavailable}, {Msg: "3"}}),
+			provider.NewMock(nil, []provider.RespMock{{Err: clients.ErrProviderUnavailable}, {Msg: "3"}}),
 			budget,
 			*latConfig,
 			1,
 		),
 		extmodel.NewLangModel(
 			"second",
-			providers.NewProviderMock(nil, []providers.RespMock{{Msg: "1"}, {Msg: "2"}}),
+			provider.NewMock(nil, []provider.RespMock{{Msg: "1"}, {Msg: "2"}}),
 			budget,
 			*latConfig,
 			1,
@@ -218,14 +218,14 @@ func TestLangRouter_Chat_AllModelsUnavailable(t *testing.T) {
 	langModels := []*extmodel.LanguageModel{
 		extmodel.NewLangModel(
 			"first",
-			providers.NewProviderMock(nil, []providers.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Err: &schemas.ErrNoModelAvailable}}),
+			provider.NewMock(nil, []provider.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Err: &schemas.ErrNoModelAvailable}}),
 			budget,
 			*latConfig,
 			1,
 		),
 		extmodel.NewLangModel(
 			"second",
-			providers.NewProviderMock(nil, []providers.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Err: &schemas.ErrNoModelAvailable}}),
+			provider.NewMock(nil, []provider.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Err: &schemas.ErrNoModelAvailable}}),
 			budget,
 			*latConfig,
 			1,
@@ -260,8 +260,8 @@ func TestLangRouter_ChatStream(t *testing.T) {
 	langModels := []*extmodel.LanguageModel{
 		extmodel.NewLangModel(
 			"first",
-			providers.NewStreamProviderMock(nil, []providers.RespStreamMock{
-				providers.NewRespStreamMock(&[]providers.RespMock{
+			provider.NewStreamProviderMock(nil, []provider.RespStreamMock{
+				provider.NewRespStreamMock(&[]provider.RespMock{
 					{Msg: "Bill"},
 					{Msg: "Gates"},
 					{Msg: "entered"},
@@ -275,8 +275,8 @@ func TestLangRouter_ChatStream(t *testing.T) {
 		),
 		extmodel.NewLangModel(
 			"second",
-			providers.NewStreamProviderMock(nil, []providers.RespStreamMock{
-				providers.NewRespStreamMock(&[]providers.RespMock{
+			provider.NewStreamProviderMock(nil, []provider.RespStreamMock{
+				provider.NewRespStreamMock(&[]provider.RespMock{
 					{Msg: "Knock"},
 					{Msg: "Knock"},
 					{Msg: "joke"},
@@ -335,16 +335,16 @@ func TestLangRouter_ChatStream_FailOnFirst(t *testing.T) {
 	langModels := []*extmodel.LanguageModel{
 		extmodel.NewLangModel(
 			"first",
-			providers.NewStreamProviderMock(nil, nil),
+			provider.NewStreamProviderMock(nil, nil),
 			budget,
 			*latConfig,
 			1,
 		),
 		extmodel.NewLangModel(
 			"second",
-			providers.NewStreamProviderMock(nil, []providers.RespStreamMock{
-				providers.NewRespStreamMock(
-					&[]providers.RespMock{
+			provider.NewStreamProviderMock(nil, []provider.RespStreamMock{
+				provider.NewRespStreamMock(
+					&[]provider.RespMock{
 						{Msg: "Knock"},
 						{Msg: "knock"},
 						{Msg: "joke"},
@@ -404,8 +404,8 @@ func TestLangRouter_ChatStream_AllModelsUnavailable(t *testing.T) {
 	langModels := []*extmodel.LanguageModel{
 		extmodel.NewLangModel(
 			"first",
-			providers.NewStreamProviderMock(nil, []providers.RespStreamMock{
-				providers.NewRespStreamMock(&[]providers.RespMock{
+			provider.NewStreamProviderMock(nil, []provider.RespStreamMock{
+				provider.NewRespStreamMock(&[]provider.RespMock{
 					{Err: clients.ErrProviderUnavailable},
 				}),
 			}),
@@ -415,8 +415,8 @@ func TestLangRouter_ChatStream_AllModelsUnavailable(t *testing.T) {
 		),
 		extmodel.NewLangModel(
 			"second",
-			providers.NewStreamProviderMock(nil, []providers.RespStreamMock{
-				providers.NewRespStreamMock(&[]providers.RespMock{
+			provider.NewStreamProviderMock(nil, []provider.RespStreamMock{
+				provider.NewRespStreamMock(&[]provider.RespMock{
 					{Err: clients.ErrProviderUnavailable},
 				}),
 			}),

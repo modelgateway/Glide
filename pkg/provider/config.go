@@ -1,4 +1,4 @@
-package providers
+package provider
 
 import (
 	"errors"
@@ -27,7 +27,7 @@ type Configurer interface {
 	ToClient(tel *telemetry.Telemetry, clientConfig *clients.ClientConfig) (LangProvider, error)
 }
 
-type Config map[ProviderID]interface{}
+type Config map[ID]interface{}
 
 var _ Configurer = (*Config)(nil)
 
@@ -69,7 +69,7 @@ func (p Config) ToClient(tel *telemetry.Telemetry, clientConfig *clients.ClientC
 
 // validate ensure there is only one provider configured and it's supported by Glide
 func (p Config) validate() error {
-	configuredProviders := make([]ProviderID, 0, len(p))
+	configuredProviders := make([]ID, 0, len(p))
 
 	for providerID, config := range p {
 		if config != nil {

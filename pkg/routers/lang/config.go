@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/EinStack/glide/pkg/extmodel"
+	"github.com/EinStack/glide/pkg/provider"
 
-	"github.com/EinStack/glide/pkg/providers"
+	"github.com/EinStack/glide/pkg/extmodel"
 
 	"github.com/EinStack/glide/pkg/routers"
 
@@ -18,7 +18,7 @@ import (
 )
 
 type (
-	ModelConfig     = extmodel.Config[*providers.Config]
+	ModelConfig     = extmodel.Config[*provider.Config]
 	ModelPoolConfig = []ModelConfig
 )
 

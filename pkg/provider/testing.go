@@ -1,4 +1,4 @@
-package providers
+package provider
 
 import (
 	"context"
@@ -22,7 +22,7 @@ type TestConfig struct {
 }
 
 func (c *TestConfig) ToClient(_ *telemetry.Telemetry, _ *clients.ClientConfig) (LangProvider, error) {
-	return NewProviderMock(nil, []RespMock{}), nil
+	return NewMock(nil, []RespMock{}), nil
 }
 
 func (c *TestConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -113,8 +113,8 @@ func (m *RespStreamMock) Close() error {
 	return nil
 }
 
-// ProviderMock mocks a model provider
-type ProviderMock struct {
+// Mock mocks a model provider
+type Mock struct {
 	idx              int
 	chatResps        *[]RespMock
 	chatStreams      *[]RespStreamMock
@@ -122,8 +122,8 @@ type ProviderMock struct {
 	modelName        *string
 }
 
-func NewProviderMock(modelName *string, responses []RespMock) *ProviderMock {
-	return &ProviderMock{
+func NewMock(modelName *string, responses []RespMock) *Mock {
+	return &Mock{
 		idx:              0,
 		chatResps:        &responses,
 		supportStreaming: false,
@@ -131,8 +131,8 @@ func NewProviderMock(modelName *string, responses []RespMock) *ProviderMock {
 	}
 }
 
-func NewStreamProviderMock(modelName *string, chatStreams []RespStreamMock) *ProviderMock {
-	return &ProviderMock{
+func NewStreamProviderMock(modelName *string, chatStreams []RespStreamMock) *Mock {
+	return &Mock{
 		idx:              0,
 		modelName:        modelName,
 		chatStreams:      &chatStreams,
@@ -140,11 +140,11 @@ func NewStreamProviderMock(modelName *string, chatStreams []RespStreamMock) *Pro
 	}
 }
 
-func (c *ProviderMock) SupportChatStream() bool {
+func (c *Mock) SupportChatStream() bool {
 	return c.supportStreaming
 }
 
-func (c *ProviderMock) Chat(_ context.Context, _ *schemas.ChatParams) (*schemas.ChatResponse, error) {
+func (c *Mock) Chat(_ context.Context, _ *schemas.ChatParams) (*schemas.ChatResponse, error) {
 	if c.chatResps == nil {
 		return nil, clients.ErrProviderUnavailable
 	}
@@ -161,7 +161,7 @@ func (c *ProviderMock) Chat(_ context.Context, _ *schemas.ChatParams) (*schemas.
 	return response.Resp(), nil
 }
 
-func (c *ProviderMock) ChatStream(_ context.Context, _ *schemas.ChatParams) (clients.ChatStream, error) {
+func (c *Mock) ChatStream(_ context.Context, _ *schemas.ChatParams) (clients.ChatStream, error) {
 	if c.chatStreams == nil || c.idx >= len(*c.chatStreams) {
 		return nil, clients.ErrProviderUnavailable
 	}
@@ -174,11 +174,11 @@ func (c *ProviderMock) ChatStream(_ context.Context, _ *schemas.ChatParams) (cli
 	return &stream, nil
 }
 
-func (c *ProviderMock) Provider() string {
+func (c *Mock) Provider() string {
 	return "provider_mock"
 }
 
-func (c *ProviderMock) ModelName() string {
+func (c *Mock) ModelName() string {
 	if c.modelName == nil {
 		return "model_mock"
 	}

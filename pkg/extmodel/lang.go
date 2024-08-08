@@ -5,7 +5,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/EinStack/glide/pkg/providers"
+	"github.com/EinStack/glide/pkg/provider"
 
 	"github.com/EinStack/glide/pkg/clients"
 	health2 "github.com/EinStack/glide/pkg/resiliency/health"
@@ -32,14 +32,14 @@ type LangModel interface {
 type LanguageModel struct {
 	modelID               string
 	weight                int
-	client                providers.LangProvider
+	client                provider.LangProvider
 	healthTracker         *health2.Tracker
 	chatLatency           *latency.MovingAverage
 	chatStreamLatency     *latency.MovingAverage
 	latencyUpdateInterval *fields.Duration
 }
 
-func NewLangModel(modelID string, client providers.LangProvider, budget *health2.ErrorBudget, latencyConfig latency.Config, weight int) *LanguageModel {
+func NewLangModel(modelID string, client provider.LangProvider, budget *health2.ErrorBudget, latencyConfig latency.Config, weight int) *LanguageModel {
 	return &LanguageModel{
 		modelID:               modelID,
 		client:                client,

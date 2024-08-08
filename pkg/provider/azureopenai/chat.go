@@ -10,7 +10,7 @@ import (
 
 	"github.com/EinStack/glide/pkg/clients"
 
-	"github.com/EinStack/glide/pkg/providers/openai"
+	"github.com/EinStack/glide/pkg/provider/openai"
 
 	"github.com/EinStack/glide/pkg/api/schemas"
 

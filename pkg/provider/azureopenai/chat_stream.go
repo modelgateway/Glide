@@ -12,7 +12,7 @@ import (
 
 	"github.com/EinStack/glide/pkg/telemetry"
 
-	"github.com/EinStack/glide/pkg/providers/openai"
+	"github.com/EinStack/glide/pkg/provider/openai"
 
 	"github.com/r3labs/sse/v2"
 
