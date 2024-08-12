@@ -8,13 +8,13 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/EinStack/glide/pkg/api/schema"
+
 	"github.com/EinStack/glide/pkg/clients"
 
 	"github.com/EinStack/glide/pkg/telemetry"
 
 	"go.uber.org/zap"
-
-	"github.com/EinStack/glide/pkg/api/schemas"
 )
 
 // SupportedEventType Cohere has other types too:
@@ -83,7 +83,7 @@ func (s *ChatStream) Open() error {
 	return nil
 }
 
-func (s *ChatStream) Recv() (*schemas.ChatStreamChunk, error) {
+func (s *ChatStream) Recv() (*schema.ChatStreamChunk, error) {
 	if s.streamFinished {
 		return nil, io.EOF
 	}
@@ -135,16 +135,16 @@ func (s *ChatStream) Recv() (*schemas.ChatStreamChunk, error) {
 			s.streamFinished = true
 
 			// TODO: use objectpool here
-			return &schemas.ChatStreamChunk{
+			return &schema.ChatStreamChunk{
 				Cached:    false,
 				Provider:  ProviderID,
 				ModelName: s.modelName,
-				ModelResponse: schemas.ModelChunkResponse{
-					Metadata: &schemas.Metadata{
+				ModelResponse: schema.ModelChunkResponse{
+					Metadata: &schema.Metadata{
 						"generation_id": s.generationID,
 						"response_id":   responseChunk.Response.ResponseID,
 					},
-					Message: schemas.ChatMessage{
+					Message: schema.ChatMessage{
 						Role:    "model",
 						Content: responseChunk.Text,
 					},
@@ -154,15 +154,15 @@ func (s *ChatStream) Recv() (*schemas.ChatStreamChunk, error) {
 		}
 
 		// TODO: use objectpool here
-		return &schemas.ChatStreamChunk{
+		return &schema.ChatStreamChunk{
 			Cached:    false,
 			Provider:  ProviderID,
 			ModelName: s.modelName,
-			ModelResponse: schemas.ModelChunkResponse{
-				Metadata: &schemas.Metadata{
+			ModelResponse: schema.ModelChunkResponse{
+				Metadata: &schema.Metadata{
 					"generation_id": s.generationID,
 				},
-				Message: schemas.ChatMessage{
+				Message: schema.ChatMessage{
 					Role:    "model",
 					Content: responseChunk.Text,
 				},
@@ -183,7 +183,7 @@ func (c *Client) SupportChatStream() bool {
 	return true
 }
 
-func (c *Client) ChatStream(ctx context.Context, params *schemas.ChatParams) (clients.ChatStream, error) {
+func (c *Client) ChatStream(ctx context.Context, params *schema.ChatParams) (clients.ChatStream, error) {
 	// Create a new chat request
 	httpRequest, err := c.makeStreamReq(ctx, params)
 	if err != nil {
@@ -200,7 +200,7 @@ func (c *Client) ChatStream(ctx context.Context, params *schemas.ChatParams) (cl
 	), nil
 }
 
-func (c *Client) makeStreamReq(ctx context.Context, params *schemas.ChatParams) (*http.Request, error) {
+func (c *Client) makeStreamReq(ctx context.Context, params *schema.ChatParams) (*http.Request, error) {
 	// TODO: consider using objectpool to optimize memory allocation
 	chatReq := *c.chatRequestTemplate
 	chatReq.ApplyParams(params)

@@ -5,6 +5,8 @@ import (
 	"io"
 	"time"
 
+	"github.com/EinStack/glide/pkg/api/schema"
+
 	"github.com/EinStack/glide/pkg/provider"
 
 	"github.com/EinStack/glide/pkg/clients"
@@ -13,16 +15,14 @@ import (
 	"github.com/EinStack/glide/pkg/config/fields"
 
 	"github.com/EinStack/glide/pkg/router/latency"
-
-	"github.com/EinStack/glide/pkg/api/schemas"
 )
 
 type LangModel interface {
 	Interface
 	Provider() string
 	ModelName() string
-	Chat(ctx context.Context, params *schemas.ChatParams) (*schemas.ChatResponse, error)
-	ChatStream(ctx context.Context, params *schemas.ChatParams) (<-chan *clients.ChatStreamResult, error)
+	Chat(ctx context.Context, params *schema.ChatParams) (*schema.ChatResponse, error)
+	ChatStream(ctx context.Context, params *schema.ChatParams) (<-chan *clients.ChatStreamResult, error)
 }
 
 // LanguageModel wraps provider client and expend it with health & latency tracking
@@ -79,7 +79,7 @@ func (m LanguageModel) ChatStreamLatency() *latency.MovingAverage {
 	return m.chatStreamLatency
 }
 
-func (m *LanguageModel) Chat(ctx context.Context, params *schemas.ChatParams) (*schemas.ChatResponse, error) {
+func (m *LanguageModel) Chat(ctx context.Context, params *schema.ChatParams) (*schema.ChatResponse, error) {
 	startedAt := time.Now()
 
 	resp, err := m.client.Chat(ctx, params)
@@ -98,7 +98,7 @@ func (m *LanguageModel) Chat(ctx context.Context, params *schemas.ChatParams) (*
 	return resp, err
 }
 
-func (m *LanguageModel) ChatStream(ctx context.Context, params *schemas.ChatParams) (<-chan *clients.ChatStreamResult, error) {
+func (m *LanguageModel) ChatStream(ctx context.Context, params *schema.ChatParams) (<-chan *clients.ChatStreamResult, error) {
 	stream, err := m.client.ChatStream(ctx, params)
 	if err != nil {
 		m.healthTracker.TrackErr(err)

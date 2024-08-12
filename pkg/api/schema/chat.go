@@ -1,4 +1,4 @@
-package schemas
+package schema
 
 // ChatRequest defines Glide's Chat Request Schema unified across all language models
 type ChatRequest struct {

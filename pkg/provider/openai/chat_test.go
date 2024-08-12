@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	clients2 "github.com/EinStack/glide/pkg/clients"
+	"github.com/EinStack/glide/pkg/api/schema"
 
-	"github.com/EinStack/glide/pkg/api/schemas"
+	clients2 "github.com/EinStack/glide/pkg/clients"
 
 	"github.com/EinStack/glide/pkg/telemetry"
 
@@ -56,7 +56,7 @@ func TestOpenAIClient_ChatRequest(t *testing.T) {
 	client, err := NewClient(providerCfg, clientCfg, telemetry.NewTelemetryMock())
 	require.NoError(t, err)
 
-	chatParams := schemas.ChatParams{Messages: []schemas.ChatMessage{{
+	chatParams := schema.ChatParams{Messages: []schema.ChatMessage{{
 		Role:    "user",
 		Content: "What's the capital of the United Kingdom?",
 	}}}
@@ -85,7 +85,7 @@ func TestOpenAIClient_RateLimit(t *testing.T) {
 	client, err := NewClient(providerCfg, clientCfg, telemetry.NewTelemetryMock())
 	require.NoError(t, err)
 
-	chatParams := schemas.ChatParams{Messages: []schemas.ChatMessage{{
+	chatParams := schema.ChatParams{Messages: []schema.ChatMessage{{
 		Role:    "human",
 		Content: "What's the biggest animal?",
 	}}}

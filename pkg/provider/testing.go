@@ -4,7 +4,8 @@ import (
 	"context"
 	"io"
 
-	"github.com/EinStack/glide/pkg/api/schemas"
+	"github.com/EinStack/glide/pkg/api/schema"
+
 	"github.com/EinStack/glide/pkg/clients"
 	"github.com/EinStack/glide/pkg/config/fields"
 	"github.com/EinStack/glide/pkg/telemetry"
@@ -37,24 +38,24 @@ type RespMock struct {
 	Err error
 }
 
-func (m *RespMock) Resp() *schemas.ChatResponse {
-	return &schemas.ChatResponse{
+func (m *RespMock) Resp() *schema.ChatResponse {
+	return &schema.ChatResponse{
 		ID: "rsp0001",
-		ModelResponse: schemas.ModelResponse{
+		ModelResponse: schema.ModelResponse{
 			Metadata: map[string]string{
 				"ID": "0001",
 			},
-			Message: schemas.ChatMessage{
+			Message: schema.ChatMessage{
 				Content: m.Msg,
 			},
 		},
 	}
 }
 
-func (m *RespMock) RespChunk() *schemas.ChatStreamChunk {
-	return &schemas.ChatStreamChunk{
-		ModelResponse: schemas.ModelChunkResponse{
-			Message: schemas.ChatMessage{
+func (m *RespMock) RespChunk() *schema.ChatStreamChunk {
+	return &schema.ChatStreamChunk{
+		ModelResponse: schema.ModelChunkResponse{
+			Message: schema.ChatMessage{
 				Content: m.Msg,
 			},
 		},
@@ -97,7 +98,7 @@ func (m *RespStreamMock) Open() error {
 	return nil
 }
 
-func (m *RespStreamMock) Recv() (*schemas.ChatStreamChunk, error) {
+func (m *RespStreamMock) Recv() (*schema.ChatStreamChunk, error) {
 	if m.Chunks != nil && m.idx >= len(*m.Chunks) {
 		return nil, io.EOF
 	}
@@ -154,7 +155,7 @@ func (c *Mock) SupportChatStream() bool {
 	return c.supportStreaming
 }
 
-func (c *Mock) Chat(_ context.Context, _ *schemas.ChatParams) (*schemas.ChatResponse, error) {
+func (c *Mock) Chat(_ context.Context, _ *schema.ChatParams) (*schema.ChatResponse, error) {
 	if c.chatResps == nil {
 		return nil, clients.ErrProviderUnavailable
 	}
@@ -171,7 +172,7 @@ func (c *Mock) Chat(_ context.Context, _ *schemas.ChatParams) (*schemas.ChatResp
 	return response.Resp(), nil
 }
 
-func (c *Mock) ChatStream(_ context.Context, _ *schemas.ChatParams) (clients.ChatStream, error) {
+func (c *Mock) ChatStream(_ context.Context, _ *schema.ChatParams) (clients.ChatStream, error) {
 	if c.chatStreams == nil || c.idx >= len(*c.chatStreams) {
 		return nil, clients.ErrProviderUnavailable
 	}

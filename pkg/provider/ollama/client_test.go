@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/EinStack/glide/pkg/clients"
+	"github.com/EinStack/glide/pkg/api/schema"
 
-	"github.com/EinStack/glide/pkg/api/schemas"
+	"github.com/EinStack/glide/pkg/clients"
 
 	"github.com/EinStack/glide/pkg/telemetry"
 
@@ -56,7 +56,7 @@ func TestOllamaClient_ChatRequest(t *testing.T) {
 	client, err := NewClient(providerCfg, clientCfg, telemetry.NewTelemetryMock())
 	require.NoError(t, err)
 
-	chatParams := schemas.ChatParams{Messages: []schemas.ChatMessage{{
+	chatParams := schema.ChatParams{Messages: []schema.ChatMessage{{
 		Role:    "user",
 		Content: "What's the biggest animal?",
 	}}}
@@ -84,7 +84,7 @@ func TestOllamaClient_ChatRequest_Non200Response(t *testing.T) {
 	client, err := NewClient(providerCfg, clientCfg, telemetry.NewTelemetryMock())
 	require.NoError(t, err)
 
-	chatParams := schemas.ChatParams{Messages: []schemas.ChatMessage{{
+	chatParams := schema.ChatParams{Messages: []schema.ChatMessage{{
 		Role:    "user",
 		Content: "What's the capital of the United Kingdom?",
 	}}}
@@ -121,7 +121,7 @@ func TestOllamaClient_ChatRequest_SuccessfulResponse(t *testing.T) {
 	client, err := NewClient(providerCfg, clientCfg, telemetry.NewTelemetryMock())
 	require.NoError(t, err)
 
-	chatParams := schemas.ChatParams{Messages: []schemas.ChatMessage{{
+	chatParams := schema.ChatParams{Messages: []schema.ChatMessage{{
 		Role:    "user",
 		Content: "What's the capital of the United Kingdom?",
 	}}}

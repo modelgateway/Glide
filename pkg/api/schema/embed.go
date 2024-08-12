@@ -1,4 +1,4 @@
-package schemas
+package schema
 
 type EmbedRequest struct {
 	// TODO: implement

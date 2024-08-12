@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/EinStack/glide/pkg/api/schemas"
+	"github.com/EinStack/glide/pkg/api/schema"
 	"github.com/EinStack/glide/pkg/telemetry"
 )
 
@@ -45,5 +45,5 @@ func (r *Manager) GetLangRouter(routerID string) (*LangRouter, error) {
 		return router, nil
 	}
 
-	return nil, &schemas.ErrRouterNotFound
+	return nil, &schema.ErrRouterNotFound
 }

@@ -8,27 +8,27 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/EinStack/glide/pkg/provider/openai"
+	"github.com/EinStack/glide/pkg/api/schema"
 
-	"github.com/EinStack/glide/pkg/api/schemas"
+	"github.com/EinStack/glide/pkg/provider/openai"
 
 	"go.uber.org/zap"
 )
 
 // ChatRequest is an octoml-specific request schema
 type ChatRequest struct {
-	Model            string                `json:"model"`
-	Messages         []schemas.ChatMessage `json:"messages"`
-	Temperature      float64               `json:"temperature,omitempty"`
-	TopP             float64               `json:"top_p,omitempty"`
-	MaxTokens        int                   `json:"max_tokens,omitempty"`
-	StopWords        []string              `json:"stop,omitempty"`
-	Stream           bool                  `json:"stream,omitempty"`
-	FrequencyPenalty int                   `json:"frequency_penalty,omitempty"`
-	PresencePenalty  int                   `json:"presence_penalty,omitempty"`
+	Model            string               `json:"model"`
+	Messages         []schema.ChatMessage `json:"messages"`
+	Temperature      float64              `json:"temperature,omitempty"`
+	TopP             float64              `json:"top_p,omitempty"`
+	MaxTokens        int                  `json:"max_tokens,omitempty"`
+	StopWords        []string             `json:"stop,omitempty"`
+	Stream           bool                 `json:"stream,omitempty"`
+	FrequencyPenalty int                  `json:"frequency_penalty,omitempty"`
+	PresencePenalty  int                  `json:"presence_penalty,omitempty"`
 }
 
-func (r *ChatRequest) ApplyParams(params *schemas.ChatParams) {
+func (r *ChatRequest) ApplyParams(params *schema.ChatParams) {
 	// TODO(185): set other params
 	r.Messages = params.Messages
 }
@@ -47,7 +47,7 @@ func NewChatRequestFromConfig(cfg *Config) *ChatRequest {
 }
 
 // Chat sends a chat request to the specified octoml model.
-func (c *Client) Chat(ctx context.Context, params *schemas.ChatParams) (*schemas.ChatResponse, error) {
+func (c *Client) Chat(ctx context.Context, params *schema.ChatParams) (*schema.ChatResponse, error) {
 	// Create a new chat request
 	// TODO: consider using objectpool to optimize memory allocation
 	chatReq := *c.chatRequestTemplate // hoping to get a copy of the template
@@ -63,7 +63,7 @@ func (c *Client) Chat(ctx context.Context, params *schemas.ChatParams) (*schemas
 	return chatResponse, nil
 }
 
-func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*schemas.ChatResponse, error) {
+func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*schema.ChatResponse, error) {
 	// Build request payload
 	rawPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -119,21 +119,21 @@ func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*sche
 	}
 
 	// Map response to UnifiedChatResponse schema
-	response := schemas.ChatResponse{
+	response := schema.ChatResponse{
 		ID:        completion.ID,
 		Created:   completion.Created,
 		Provider:  providerName,
 		ModelName: completion.ModelName,
 		Cached:    false,
-		ModelResponse: schemas.ModelResponse{
+		ModelResponse: schema.ModelResponse{
 			Metadata: map[string]string{
 				"system_fingerprint": completion.SystemFingerprint,
 			},
-			Message: schemas.ChatMessage{
+			Message: schema.ChatMessage{
 				Role:    modelChoice.Message.Role,
 				Content: modelChoice.Message.Content,
 			},
-			TokenUsage: schemas.TokenUsage{
+			TokenUsage: schema.TokenUsage{
 				PromptTokens:   completion.Usage.PromptTokens,
 				ResponseTokens: completion.Usage.CompletionTokens,
 				TotalTokens:    completion.Usage.TotalTokens,

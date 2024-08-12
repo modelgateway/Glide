@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/EinStack/glide/pkg/clients"
+	"github.com/EinStack/glide/pkg/api/schema"
 
-	"github.com/EinStack/glide/pkg/api/schemas"
+	"github.com/EinStack/glide/pkg/clients"
 
 	"go.uber.org/zap"
 )
@@ -30,7 +30,7 @@ func NewChatRequestFromConfig(cfg *Config) *ChatRequest {
 }
 
 // Chat sends a chat request to the specified cohere model.
-func (c *Client) Chat(ctx context.Context, params *schemas.ChatParams) (*schemas.ChatResponse, error) {
+func (c *Client) Chat(ctx context.Context, params *schema.ChatParams) (*schema.ChatResponse, error) {
 	// Create a new chat request
 	// TODO: consider using objectpool to optimize memory allocation
 	chatReq := *c.chatRequestTemplate
@@ -44,7 +44,7 @@ func (c *Client) Chat(ctx context.Context, params *schemas.ChatParams) (*schemas
 	return chatResponse, nil
 }
 
-func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*schemas.ChatResponse, error) {
+func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*schema.ChatResponse, error) {
 	// Build request payload
 	rawPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -115,22 +115,22 @@ func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*sche
 	}
 
 	// Map response to ChatResponse schema
-	response := schemas.ChatResponse{
+	response := schema.ChatResponse{
 		ID:        cohereCompletion.ResponseID,
 		Created:   int(time.Now().UTC().Unix()), // Cohere doesn't provide this
 		Provider:  ProviderID,
 		ModelName: c.config.ModelName,
 		Cached:    false,
-		ModelResponse: schemas.ModelResponse{
+		ModelResponse: schema.ModelResponse{
 			Metadata: map[string]string{
 				"generationId": cohereCompletion.GenerationID,
 				"responseId":   cohereCompletion.ResponseID,
 			},
-			Message: schemas.ChatMessage{
+			Message: schema.ChatMessage{
 				Role:    "assistant",
 				Content: cohereCompletion.Text,
 			},
-			TokenUsage: schemas.TokenUsage{
+			TokenUsage: schema.TokenUsage{
 				PromptTokens:   cohereCompletion.TokenCount.PromptTokens,
 				ResponseTokens: cohereCompletion.TokenCount.ResponseTokens,
 				TotalTokens:    cohereCompletion.TokenCount.TotalTokens,

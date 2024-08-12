@@ -3,7 +3,8 @@ package router
 import (
 	"context"
 
-	"github.com/EinStack/glide/pkg/api/schemas"
+	"github.com/EinStack/glide/pkg/api/schema"
+
 	"github.com/EinStack/glide/pkg/telemetry"
 )
 
@@ -20,6 +21,6 @@ func NewEmbedRouter(_ *EmbedRouterConfig, _ *telemetry.Telemetry) (*EmbedRouter,
 	return &EmbedRouter{}, nil
 }
 
-func (r *EmbedRouter) Embed(ctx context.Context, req *schemas.EmbedRequest) (*schemas.EmbedResponse, error) {
+func (r *EmbedRouter) Embed(ctx context.Context, req *schema.EmbedRequest) (*schema.EmbedResponse, error) {
 	// TODO: implement
 }

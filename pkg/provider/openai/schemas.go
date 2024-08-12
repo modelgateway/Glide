@@ -1,28 +1,28 @@
 package openai
 
-import "github.com/EinStack/glide/pkg/api/schemas"
+import "github.com/EinStack/glide/pkg/api/schema"
 
 // ChatRequest is an OpenAI-specific request schema
 type ChatRequest struct {
-	Model            string                `json:"model"`
-	Messages         []schemas.ChatMessage `json:"messages"`
-	Temperature      float64               `json:"temperature,omitempty"`
-	TopP             float64               `json:"top_p,omitempty"`
-	MaxTokens        int                   `json:"max_tokens,omitempty"`
-	N                int                   `json:"n,omitempty"`
-	StopWords        []string              `json:"stop,omitempty"`
-	Stream           bool                  `json:"stream,omitempty"`
-	FrequencyPenalty int                   `json:"frequency_penalty,omitempty"`
-	PresencePenalty  int                   `json:"presence_penalty,omitempty"`
-	LogitBias        *map[int]float64      `json:"logit_bias,omitempty"`
-	User             *string               `json:"user,omitempty"`
-	Seed             *int                  `json:"seed,omitempty"`
-	Tools            []string              `json:"tools,omitempty"`
-	ToolChoice       interface{}           `json:"tool_choice,omitempty"`
-	ResponseFormat   interface{}           `json:"response_format,omitempty"`
+	Model            string               `json:"model"`
+	Messages         []schema.ChatMessage `json:"messages"`
+	Temperature      float64              `json:"temperature,omitempty"`
+	TopP             float64              `json:"top_p,omitempty"`
+	MaxTokens        int                  `json:"max_tokens,omitempty"`
+	N                int                  `json:"n,omitempty"`
+	StopWords        []string             `json:"stop,omitempty"`
+	Stream           bool                 `json:"stream,omitempty"`
+	FrequencyPenalty int                  `json:"frequency_penalty,omitempty"`
+	PresencePenalty  int                  `json:"presence_penalty,omitempty"`
+	LogitBias        *map[int]float64     `json:"logit_bias,omitempty"`
+	User             *string              `json:"user,omitempty"`
+	Seed             *int                 `json:"seed,omitempty"`
+	Tools            []string             `json:"tools,omitempty"`
+	ToolChoice       interface{}          `json:"tool_choice,omitempty"`
+	ResponseFormat   interface{}          `json:"response_format,omitempty"`
 }
 
-func (r *ChatRequest) ApplyParams(params *schemas.ChatParams) {
+func (r *ChatRequest) ApplyParams(params *schema.ChatParams) {
 	// TODO(185): set other params
 	r.Messages = params.Messages
 }
@@ -40,10 +40,10 @@ type ChatCompletion struct {
 }
 
 type Choice struct {
-	Index        int                 `json:"index"`
-	Message      schemas.ChatMessage `json:"message"`
-	Logprobs     interface{}         `json:"logprobs"`
-	FinishReason string              `json:"finish_reason"`
+	Index        int                `json:"index"`
+	Message      schema.ChatMessage `json:"message"`
+	Logprobs     interface{}        `json:"logprobs"`
+	FinishReason string             `json:"finish_reason"`
 }
 
 type Usage struct {
@@ -64,8 +64,8 @@ type ChatCompletionChunk struct {
 }
 
 type StreamChoice struct {
-	Index        int                 `json:"index"`
-	Delta        schemas.ChatMessage `json:"delta"`
-	Logprobs     interface{}         `json:"logprobs"`
-	FinishReason string              `json:"finish_reason"`
+	Index        int                `json:"index"`
+	Delta        schema.ChatMessage `json:"delta"`
+	Logprobs     interface{}        `json:"logprobs"`
+	FinishReason string             `json:"finish_reason"`
 }

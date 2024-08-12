@@ -1,6 +1,6 @@
 package cohere
 
-import "github.com/EinStack/glide/pkg/api/schemas"
+import "github.com/EinStack/glide/pkg/api/schema"
 
 // Cohere Chat Response
 type ChatCompletion struct {
@@ -90,25 +90,25 @@ type FinalResponse struct {
 // ChatRequest is a request to complete a chat completion
 // Ref: https://docs.cohere.com/reference/chat
 type ChatRequest struct {
-	Model             string                `json:"model"`
-	Message           string                `json:"message"`
-	ChatHistory       []schemas.ChatMessage `json:"chat_history"`
-	Temperature       float64               `json:"temperature,omitempty"`
-	Preamble          string                `json:"preamble,omitempty"`
-	PromptTruncation  *string               `json:"prompt_truncation,omitempty"`
-	Connectors        []string              `json:"connectors,omitempty"`
-	SearchQueriesOnly bool                  `json:"search_queries_only,omitempty"`
-	Stream            bool                  `json:"stream,omitempty"`
-	Seed              *int                  `json:"seed,omitempty"`
-	MaxTokens         *int                  `json:"max_tokens,omitempty"`
-	K                 int                   `json:"k"`
-	P                 float32               `json:"p"`
-	FrequencyPenalty  float32               `json:"frequency_penalty"`
-	PresencePenalty   float32               `json:"presence_penalty"`
-	StopSequences     []string              `json:"stop_sequences"`
+	Model             string               `json:"model"`
+	Message           string               `json:"message"`
+	ChatHistory       []schema.ChatMessage `json:"chat_history"`
+	Temperature       float64              `json:"temperature,omitempty"`
+	Preamble          string               `json:"preamble,omitempty"`
+	PromptTruncation  *string              `json:"prompt_truncation,omitempty"`
+	Connectors        []string             `json:"connectors,omitempty"`
+	SearchQueriesOnly bool                 `json:"search_queries_only,omitempty"`
+	Stream            bool                 `json:"stream,omitempty"`
+	Seed              *int                 `json:"seed,omitempty"`
+	MaxTokens         *int                 `json:"max_tokens,omitempty"`
+	K                 int                  `json:"k"`
+	P                 float32              `json:"p"`
+	FrequencyPenalty  float32              `json:"frequency_penalty"`
+	PresencePenalty   float32              `json:"presence_penalty"`
+	StopSequences     []string             `json:"stop_sequences"`
 }
 
-func (r *ChatRequest) ApplyParams(params *schemas.ChatParams) {
+func (r *ChatRequest) ApplyParams(params *schema.ChatParams) {
 	message := params.Messages[len(params.Messages)-1]
 	messageHistory := params.Messages[:len(params.Messages)-1]
 

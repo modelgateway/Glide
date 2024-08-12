@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/EinStack/glide/pkg/clients"
+	"github.com/EinStack/glide/pkg/api/schema"
 
-	"github.com/EinStack/glide/pkg/api/schemas"
+	"github.com/EinStack/glide/pkg/clients"
 
 	"github.com/EinStack/glide/pkg/telemetry"
 
@@ -56,7 +56,7 @@ func TestAnthropicClient_ChatRequest(t *testing.T) {
 	client, err := NewClient(providerCfg, clientCfg, telemetry.NewTelemetryMock())
 	require.NoError(t, err)
 
-	chatParams := schemas.ChatParams{Messages: []schemas.ChatMessage{{
+	chatParams := schema.ChatParams{Messages: []schema.ChatMessage{{
 		Role:    "human",
 		Content: "What's the biggest animal?",
 	}}}
@@ -86,7 +86,7 @@ func TestAnthropicClient_BadChatRequest(t *testing.T) {
 	client, err := NewClient(providerCfg, clientCfg, telemetry.NewTelemetryMock())
 	require.NoError(t, err)
 
-	chatParams := schemas.ChatParams{Messages: []schemas.ChatMessage{{
+	chatParams := schema.ChatParams{Messages: []schema.ChatMessage{{
 		Role:    "human",
 		Content: "What's the biggest animal?",
 	}}}

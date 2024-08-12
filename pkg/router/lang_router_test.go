@@ -13,7 +13,6 @@ import (
 	"github.com/EinStack/glide/pkg/resiliency/health"
 	"github.com/EinStack/glide/pkg/resiliency/retry"
 
-	"github.com/EinStack/glide/pkg/api/schemas"
 	"github.com/EinStack/glide/pkg/router/latency"
 	"github.com/EinStack/glide/pkg/router/routing"
 	"github.com/EinStack/glide/pkg/telemetry"
@@ -56,7 +55,7 @@ func TestLangRouter_Chat_PickFistHealthy(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	req := schemas.NewChatFromStr("tell me a dad joke")
+	req := schema.NewChatFromStr("tell me a dad joke")
 
 	for i := 0; i < 2; i++ {
 		resp, err := router.Chat(ctx, req)
@@ -73,14 +72,14 @@ func TestLangRouter_Chat_PickThirdHealthy(t *testing.T) {
 	langModels := []*extmodel.LanguageModel{
 		extmodel.NewLangModel(
 			"first",
-			provider.NewMock(nil, []provider.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "3"}}),
+			provider.NewMock(nil, []provider.RespMock{{Err: &schema.ErrNoModelAvailable}, {Msg: "3"}}),
 			budget,
 			*latConfig,
 			1,
 		),
 		extmodel.NewLangModel(
 			"second",
-			provider.NewMock(nil, []provider.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "4"}}),
+			provider.NewMock(nil, []provider.RespMock{{Err: &schema.ErrNoModelAvailable}, {Msg: "4"}}),
 			budget,
 			*latConfig,
 			1,
@@ -113,7 +112,7 @@ func TestLangRouter_Chat_PickThirdHealthy(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	req := schemas.NewChatFromStr("tell me a dad joke")
+	req := schema.NewChatFromStr("tell me a dad joke")
 
 	for _, modelID := range expectedModels {
 		resp, err := router.Chat(ctx, req)
@@ -130,14 +129,14 @@ func TestLangRouter_Chat_SuccessOnRetry(t *testing.T) {
 	langModels := []*extmodel.LanguageModel{
 		extmodel.NewLangModel(
 			"first",
-			provider.NewMock(nil, []provider.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "2"}}),
+			provider.NewMock(nil, []provider.RespMock{{Err: &schema.ErrNoModelAvailable}, {Msg: "2"}}),
 			budget,
 			*latConfig,
 			1,
 		),
 		extmodel.NewLangModel(
 			"second",
-			provider.NewMock(nil, []provider.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Msg: "1"}}),
+			provider.NewMock(nil, []provider.RespMock{{Err: &schema.ErrNoModelAvailable}, {Msg: "1"}}),
 			budget,
 			*latConfig,
 			1,
@@ -160,7 +159,7 @@ func TestLangRouter_Chat_SuccessOnRetry(t *testing.T) {
 		logger:            telemetry.NewLoggerMock(),
 	}
 
-	resp, err := router.Chat(context.Background(), schemas.NewChatFromStr("tell me a dad joke"))
+	resp, err := router.Chat(context.Background(), schema.NewChatFromStr("tell me a dad joke"))
 
 	require.NoError(t, err)
 	require.Equal(t, "first", resp.ModelID)
@@ -204,7 +203,7 @@ func TestLangRouter_Chat_UnhealthyModelInThePool(t *testing.T) {
 	}
 
 	for i := 0; i < 2; i++ {
-		resp, err := router.Chat(context.Background(), schemas.NewChatFromStr("tell me a dad joke"))
+		resp, err := router.Chat(context.Background(), schema.NewChatFromStr("tell me a dad joke"))
 
 		require.NoError(t, err)
 		require.Equal(t, "second", resp.ModelID)
@@ -218,14 +217,14 @@ func TestLangRouter_Chat_AllModelsUnavailable(t *testing.T) {
 	langModels := []*extmodel.LanguageModel{
 		extmodel.NewLangModel(
 			"first",
-			provider.NewMock(nil, []provider.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Err: &schemas.ErrNoModelAvailable}}),
+			provider.NewMock(nil, []provider.RespMock{{Err: &schema.ErrNoModelAvailable}, {Err: &schema.ErrNoModelAvailable}}),
 			budget,
 			*latConfig,
 			1,
 		),
 		extmodel.NewLangModel(
 			"second",
-			provider.NewMock(nil, []provider.RespMock{{Err: &schemas.ErrNoModelAvailable}, {Err: &schemas.ErrNoModelAvailable}}),
+			provider.NewMock(nil, []provider.RespMock{{Err: &schema.ErrNoModelAvailable}, {Err: &schema.ErrNoModelAvailable}}),
 			budget,
 			*latConfig,
 			1,
@@ -248,7 +247,7 @@ func TestLangRouter_Chat_AllModelsUnavailable(t *testing.T) {
 		logger:            telemetry.NewLoggerMock(),
 	}
 
-	_, err := router.Chat(context.Background(), schemas.NewChatFromStr("tell me a dad joke"))
+	_, err := router.Chat(context.Background(), schema.NewChatFromStr("tell me a dad joke"))
 
 	require.Error(t, err)
 }
@@ -305,8 +304,8 @@ func TestLangRouter_ChatStream(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	req := schemas.NewChatStreamFromStr("tell me a dad joke")
-	respC := make(chan *schemas.ChatStreamMessage)
+	req := schema.NewChatStreamFromStr("tell me a dad joke")
+	respC := make(chan *schema.ChatStreamMessage)
 
 	defer close(respC)
 
@@ -374,8 +373,8 @@ func TestLangRouter_ChatStream_FailOnFirst(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	req := schemas.NewChatStreamFromStr("tell me a dad joke")
-	respC := make(chan *schemas.ChatStreamMessage)
+	req := schema.NewChatStreamFromStr("tell me a dad joke")
+	respC := make(chan *schema.ChatStreamMessage)
 
 	defer close(respC)
 
@@ -442,10 +441,10 @@ func TestLangRouter_ChatStream_AllModelsUnavailable(t *testing.T) {
 		logger:            telemetry.NewLoggerMock(),
 	}
 
-	respC := make(chan *schemas.ChatStreamMessage)
+	respC := make(chan *schema.ChatStreamMessage)
 	defer close(respC)
 
-	go router.ChatStream(context.Background(), schemas.NewChatStreamFromStr("tell me a dad joke"), respC)
+	go router.ChatStream(context.Background(), schema.NewChatStreamFromStr("tell me a dad joke"), respC)
 
 	errs := make([]string, 0, 3)
 
@@ -457,5 +456,5 @@ func TestLangRouter_ChatStream_AllModelsUnavailable(t *testing.T) {
 		errs = append(errs, result.Error.Name)
 	}
 
-	require.Equal(t, []string{schemas.ModelUnavailable, schemas.ModelUnavailable, schemas.AllModelsUnavailable}, errs)
+	require.Equal(t, []string{schema.ModelUnavailable, schema.ModelUnavailable, schema.AllModelsUnavailable}, errs)
 }

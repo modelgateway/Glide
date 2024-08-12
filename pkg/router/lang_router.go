@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 
+	"github.com/EinStack/glide/pkg/api/schema"
+
 	"github.com/EinStack/glide/pkg/extmodel"
 
-	"github.com/EinStack/glide/pkg/api/schemas"
 	"github.com/EinStack/glide/pkg/resiliency/retry"
 	"github.com/EinStack/glide/pkg/router/routing"
 	"github.com/EinStack/glide/pkg/telemetry"
@@ -59,7 +60,7 @@ func (r *LangRouter) ID() ID {
 	return r.routerID
 }
 
-func (r *LangRouter) Chat(ctx context.Context, req *schemas.ChatRequest) (*schemas.ChatResponse, error) {
+func (r *LangRouter) Chat(ctx context.Context, req *schema.ChatRequest) (*schema.ChatResponse, error) {
 	if len(r.chatModels) == 0 {
 		return nil, ErrNoModels
 	}
@@ -112,22 +113,22 @@ func (r *LangRouter) Chat(ctx context.Context, req *schemas.ChatRequest) (*schem
 	// if we reach this part, then we are in trouble
 	r.logger.Error("No model was available to handle chat request")
 
-	return nil, &schemas.ErrNoModelAvailable
+	return nil, &schema.ErrNoModelAvailable
 }
 
 func (r *LangRouter) ChatStream(
 	ctx context.Context,
-	req *schemas.ChatStreamRequest,
-	respC chan<- *schemas.ChatStreamMessage,
+	req *schema.ChatStreamRequest,
+	respC chan<- *schema.ChatStreamMessage,
 ) {
 	if len(r.chatStreamModels) == 0 {
-		respC <- schemas.NewChatStreamError(
+		respC <- schema.NewChatStreamError(
 			req.ID,
 			r.routerID,
-			schemas.NoModelConfigured,
+			schema.NoModelConfigured,
 			ErrNoModels.Error(),
 			req.Metadata,
-			&schemas.ReasonError,
+			&schema.ReasonError,
 		)
 
 		return
@@ -175,10 +176,10 @@ func (r *LangRouter) ChatStream(
 					// It's challenging to hide an error in case of streaming chat as consumer apps
 					//  may have already used all chunks we streamed this far (e.g. showed them to their users like OpenAI UI does),
 					//  so we cannot easily restart that process from scratch
-					respC <- schemas.NewChatStreamError(
+					respC <- schema.NewChatStreamError(
 						req.ID,
 						r.routerID,
-						schemas.ModelUnavailable,
+						schema.ModelUnavailable,
 						err.Error(),
 						req.Metadata,
 						nil,
@@ -189,7 +190,7 @@ func (r *LangRouter) ChatStream(
 
 				chunk := chunkResult.Chunk()
 
-				respC <- schemas.NewChatStreamChunk(
+				respC <- schema.NewChatStreamChunk(
 					req.ID,
 					r.routerID,
 					req.Metadata,
@@ -207,10 +208,10 @@ func (r *LangRouter) ChatStream(
 		err := retryIterator.WaitNext(ctx)
 		if err != nil {
 			// something has cancelled the context
-			respC <- schemas.NewChatStreamError(
+			respC <- schema.NewChatStreamError(
 				req.ID,
 				r.routerID,
-				schemas.UnknownError,
+				schema.UnknownError,
 				err.Error(),
 				req.Metadata,
 				nil,
@@ -226,12 +227,12 @@ func (r *LangRouter) ChatStream(
 			"Try to configure more fallback models to avoid this",
 	)
 
-	respC <- schemas.NewChatStreamError(
+	respC <- schema.NewChatStreamError(
 		req.ID,
 		r.routerID,
-		schemas.ErrNoModelAvailable.Name,
-		schemas.ErrNoModelAvailable.Message,
+		schema.ErrNoModelAvailable.Name,
+		schema.ErrNoModelAvailable.Message,
 		req.Metadata,
-		&schemas.ReasonError,
+		&schema.ReasonError,
 	)
 }

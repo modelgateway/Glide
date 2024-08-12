@@ -9,38 +9,38 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/EinStack/glide/pkg/api/schema"
+
 	"github.com/EinStack/glide/pkg/clients"
 
 	"github.com/google/uuid"
-
-	"github.com/EinStack/glide/pkg/api/schemas"
 
 	"go.uber.org/zap"
 )
 
 // ChatRequest is an ollama-specific request schema
 type ChatRequest struct {
-	Model        string                `json:"model"`
-	Messages     []schemas.ChatMessage `json:"messages"`
-	Microstat    int                   `json:"microstat,omitempty"`
-	MicrostatEta float64               `json:"microstat_eta,omitempty"`
-	MicrostatTau float64               `json:"microstat_tau,omitempty"`
-	NumCtx       int                   `json:"num_ctx,omitempty"`
-	NumGqa       int                   `json:"num_gqa,omitempty"`
-	NumGpu       int                   `json:"num_gpu,omitempty"`
-	NumThread    int                   `json:"num_thread,omitempty"`
-	RepeatLastN  int                   `json:"repeat_last_n,omitempty"`
-	Temperature  float64               `json:"temperature,omitempty"`
-	Seed         int                   `json:"seed,omitempty"`
-	StopWords    []string              `json:"stop,omitempty"`
-	Tfsz         float64               `json:"tfs_z,omitempty"`
-	NumPredict   int                   `json:"num_predict,omitempty"`
-	TopK         int                   `json:"top_k,omitempty"`
-	TopP         float64               `json:"top_p,omitempty"`
-	Stream       bool                  `json:"stream"`
+	Model        string               `json:"model"`
+	Messages     []schema.ChatMessage `json:"messages"`
+	Microstat    int                  `json:"microstat,omitempty"`
+	MicrostatEta float64              `json:"microstat_eta,omitempty"`
+	MicrostatTau float64              `json:"microstat_tau,omitempty"`
+	NumCtx       int                  `json:"num_ctx,omitempty"`
+	NumGqa       int                  `json:"num_gqa,omitempty"`
+	NumGpu       int                  `json:"num_gpu,omitempty"`
+	NumThread    int                  `json:"num_thread,omitempty"`
+	RepeatLastN  int                  `json:"repeat_last_n,omitempty"`
+	Temperature  float64              `json:"temperature,omitempty"`
+	Seed         int                  `json:"seed,omitempty"`
+	StopWords    []string             `json:"stop,omitempty"`
+	Tfsz         float64              `json:"tfs_z,omitempty"`
+	NumPredict   int                  `json:"num_predict,omitempty"`
+	TopK         int                  `json:"top_k,omitempty"`
+	TopP         float64              `json:"top_p,omitempty"`
+	Stream       bool                 `json:"stream"`
 }
 
-func (r *ChatRequest) ApplyParams(params *schemas.ChatParams) {
+func (r *ChatRequest) ApplyParams(params *schema.ChatParams) {
 	// TODO(185): set other params
 	r.Messages = params.Messages
 }
@@ -68,7 +68,7 @@ func NewChatRequestFromConfig(cfg *Config) *ChatRequest {
 }
 
 // Chat sends a chat request to the specified ollama model.
-func (c *Client) Chat(ctx context.Context, params *schemas.ChatParams) (*schemas.ChatResponse, error) {
+func (c *Client) Chat(ctx context.Context, params *schema.ChatParams) (*schema.ChatResponse, error) {
 	// Create a new chat request
 	// TODO: consider using objectpool to optimize memory allocation
 	chatReq := *c.chatRequestTemplate // hoping to get a copy of the template
@@ -84,7 +84,7 @@ func (c *Client) Chat(ctx context.Context, params *schemas.ChatParams) (*schemas
 	return chatResponse, nil
 }
 
-func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*schemas.ChatResponse, error) { //nolint:cyclop
+func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*schema.ChatResponse, error) { //nolint:cyclop
 	// Build request payload
 	rawPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -164,18 +164,18 @@ func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*sche
 	}
 
 	// Map response to UnifiedChatResponse schema
-	response := schemas.ChatResponse{
+	response := schema.ChatResponse{
 		ID:        uuid.NewString(),
 		Created:   int(time.Now().Unix()),
 		Provider:  providerName,
 		ModelName: ollamaCompletion.Model,
 		Cached:    false,
-		ModelResponse: schemas.ModelResponse{
-			Message: schemas.ChatMessage{
+		ModelResponse: schema.ModelResponse{
+			Message: schema.ChatMessage{
 				Role:    ollamaCompletion.Message.Role,
 				Content: ollamaCompletion.Message.Content,
 			},
-			TokenUsage: schemas.TokenUsage{
+			TokenUsage: schema.TokenUsage{
 				PromptTokens:   ollamaCompletion.EvalCount,
 				ResponseTokens: ollamaCompletion.EvalCount,
 				TotalTokens:    ollamaCompletion.EvalCount,

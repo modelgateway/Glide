@@ -8,9 +8,10 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/EinStack/glide/pkg/api/schema"
+
 	"github.com/EinStack/glide/pkg/clients"
 
-	"github.com/EinStack/glide/pkg/api/schemas"
 	"go.uber.org/zap"
 )
 
@@ -36,7 +37,7 @@ func NewChatRequestFromConfig(cfg *Config) *ChatRequest {
 }
 
 // Chat sends a chat request to the specified OpenAI model.
-func (c *Client) Chat(ctx context.Context, params *schemas.ChatParams) (*schemas.ChatResponse, error) {
+func (c *Client) Chat(ctx context.Context, params *schema.ChatParams) (*schema.ChatResponse, error) {
 	// Create a new chat request
 	// TODO: consider using objectpool to optimize memory allocation
 	chatReq := *c.chatRequestTemplate // hoping to get a copy of the template
@@ -52,7 +53,7 @@ func (c *Client) Chat(ctx context.Context, params *schemas.ChatParams) (*schemas
 	return chatResponse, nil
 }
 
-func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*schemas.ChatResponse, error) {
+func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*schema.ChatResponse, error) {
 	// Build request payload
 	rawPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -123,21 +124,21 @@ func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*sche
 	}
 
 	// Map response to ChatResponse schema
-	response := schemas.ChatResponse{
+	response := schema.ChatResponse{
 		ID:        chatCompletion.ID,
 		Created:   chatCompletion.Created,
 		Provider:  ProviderID,
 		ModelName: chatCompletion.ModelName,
 		Cached:    false,
-		ModelResponse: schemas.ModelResponse{
+		ModelResponse: schema.ModelResponse{
 			Metadata: map[string]string{
 				"system_fingerprint": chatCompletion.SystemFingerprint,
 			},
-			Message: schemas.ChatMessage{
+			Message: schema.ChatMessage{
 				Role:    modelChoice.Message.Role,
 				Content: modelChoice.Message.Content,
 			},
-			TokenUsage: schemas.TokenUsage{
+			TokenUsage: schema.TokenUsage{
 				PromptTokens:   chatCompletion.Usage.PromptTokens,
 				ResponseTokens: chatCompletion.Usage.CompletionTokens,
 				TotalTokens:    chatCompletion.Usage.TotalTokens,

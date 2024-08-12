@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/EinStack/glide/pkg/api/schemas"
+	"github.com/EinStack/glide/pkg/api/schema"
 
 	"go.uber.org/zap"
 
@@ -22,7 +22,7 @@ type ChatRequest struct {
 	TextGenerationConfig TextGenerationConfig `json:"textGenerationConfig"`
 }
 
-func (r *ChatRequest) ApplyParams(params *schemas.ChatParams) {
+func (r *ChatRequest) ApplyParams(params *schema.ChatParams) {
 	// message history not yet supported for AWS models
 	// TODO: do something about lack of message history. Maybe just concatenate all messages?
 	// 	in any case, this is not a way to go to ignore message history
@@ -51,7 +51,7 @@ func NewChatRequestFromConfig(cfg *Config) *ChatRequest {
 }
 
 // Chat sends a chat request to the specified bedrock model.
-func (c *Client) Chat(ctx context.Context, params *schemas.ChatParams) (*schemas.ChatResponse, error) {
+func (c *Client) Chat(ctx context.Context, params *schema.ChatParams) (*schema.ChatResponse, error) {
 	// Create a new chat request
 	// TODO: consider using objectpool to optimize memory allocation
 	chatReq := *c.chatRequestTemplate // hoping to get a copy of the template
@@ -65,7 +65,7 @@ func (c *Client) Chat(ctx context.Context, params *schemas.ChatParams) (*schemas
 	return chatResponse, nil
 }
 
-func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*schemas.ChatResponse, error) {
+func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*schema.ChatResponse, error) {
 	rawPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("unable to marshal chat request payload: %w", err)
@@ -96,18 +96,18 @@ func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*sche
 		return nil, ErrEmptyResponse
 	}
 
-	response := schemas.ChatResponse{
+	response := schema.ChatResponse{
 		ID:        uuid.NewString(),
 		Created:   int(time.Now().Unix()),
 		Provider:  providerName,
 		ModelName: c.config.ModelName,
 		Cached:    false,
-		ModelResponse: schemas.ModelResponse{
-			Message: schemas.ChatMessage{
+		ModelResponse: schema.ModelResponse{
+			Message: schema.ChatMessage{
 				Role:    "assistant",
 				Content: modelResult.OutputText,
 			},
-			TokenUsage: schemas.TokenUsage{
+			TokenUsage: schema.TokenUsage{
 				// TODO: what would happen if there is a few responses? We need to sum that up
 				PromptTokens:   modelResult.TokenCount,
 				ResponseTokens: -1,

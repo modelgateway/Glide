@@ -9,27 +9,28 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/EinStack/glide/pkg/api/schema"
+
 	"github.com/EinStack/glide/pkg/clients"
 
-	"github.com/EinStack/glide/pkg/api/schemas"
 	"go.uber.org/zap"
 )
 
 // ChatRequest is an Anthropic-specific request schema
 type ChatRequest struct {
-	Model         string                `json:"model"`
-	Messages      []schemas.ChatMessage `json:"messages"`
-	System        string                `json:"system,omitempty"`
-	Temperature   float64               `json:"temperature,omitempty"`
-	TopP          float64               `json:"top_p,omitempty"`
-	TopK          int                   `json:"top_k,omitempty"`
-	MaxTokens     int                   `json:"max_tokens,omitempty"`
-	Stream        bool                  `json:"stream,omitempty"`
-	Metadata      *string               `json:"metadata,omitempty"`
-	StopSequences []string              `json:"stop_sequences,omitempty"`
+	Model         string               `json:"model"`
+	Messages      []schema.ChatMessage `json:"messages"`
+	System        string               `json:"system,omitempty"`
+	Temperature   float64              `json:"temperature,omitempty"`
+	TopP          float64              `json:"top_p,omitempty"`
+	TopK          int                  `json:"top_k,omitempty"`
+	MaxTokens     int                  `json:"max_tokens,omitempty"`
+	Stream        bool                 `json:"stream,omitempty"`
+	Metadata      *string              `json:"metadata,omitempty"`
+	StopSequences []string             `json:"stop_sequences,omitempty"`
 }
 
-func (r *ChatRequest) ApplyParams(params *schemas.ChatParams) {
+func (r *ChatRequest) ApplyParams(params *schema.ChatParams) {
 	r.Messages = params.Messages
 }
 
@@ -51,7 +52,7 @@ func NewChatRequestFromConfig(cfg *Config) *ChatRequest {
 // Chat sends a chat request to the specified anthropic model.
 //
 //	Ref: https://docs.anthropic.com/claude/reference/messages_post
-func (c *Client) Chat(ctx context.Context, params *schemas.ChatParams) (*schemas.ChatResponse, error) {
+func (c *Client) Chat(ctx context.Context, params *schema.ChatParams) (*schema.ChatResponse, error) {
 	// Create a new chat request
 	// TODO: consider using objectpool to optimize memory allocation
 	chatReq := *c.chatRequestTemplate
@@ -67,7 +68,7 @@ func (c *Client) Chat(ctx context.Context, params *schemas.ChatParams) (*schemas
 	return chatResponse, nil
 }
 
-func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*schemas.ChatResponse, error) {
+func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*schema.ChatResponse, error) {
 	// Build request payload
 	rawPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -130,19 +131,19 @@ func (c *Client) doChatRequest(ctx context.Context, payload *ChatRequest) (*sche
 	usage := anthropicResponse.Usage
 
 	// Map response to ChatResponse schema
-	response := schemas.ChatResponse{
+	response := schema.ChatResponse{
 		ID:        anthropicResponse.ID,
 		Created:   int(time.Now().UTC().Unix()), // not provided by anthropic
 		Provider:  ProviderID,
 		ModelName: anthropicResponse.Model,
 		Cached:    false,
-		ModelResponse: schemas.ModelResponse{
+		ModelResponse: schema.ModelResponse{
 			Metadata: map[string]string{},
-			Message: schemas.ChatMessage{
+			Message: schema.ChatMessage{
 				Role:    completion.Type,
 				Content: completion.Text,
 			},
-			TokenUsage: schemas.TokenUsage{
+			TokenUsage: schema.TokenUsage{
 				PromptTokens:   usage.InputTokens,
 				ResponseTokens: usage.OutputTokens,
 				TotalTokens:    usage.InputTokens + usage.OutputTokens,

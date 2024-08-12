@@ -1,4 +1,4 @@
-package schemas
+package schema
 
 // RouterListSchema returns list of active configured routers.
 //

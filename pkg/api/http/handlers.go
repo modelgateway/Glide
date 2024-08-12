@@ -6,7 +6,6 @@ import (
 
 	"github.com/EinStack/glide/pkg/router"
 
-	"github.com/EinStack/glide/pkg/api/schemas"
 	"github.com/EinStack/glide/pkg/telemetry"
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
@@ -35,16 +34,16 @@ type Handler = func(c *fiber.Ctx) error
 func LangChatHandler(routerManager *router.Manager) Handler {
 	return func(c *fiber.Ctx) error {
 		if !c.Is("json") {
-			return c.Status(fiber.StatusBadRequest).JSON(schemas.ErrUnsupportedMediaType)
+			return c.Status(fiber.StatusBadRequest).JSON(schema.ErrUnsupportedMediaType)
 		}
 
 		// Unmarshal request body
-		req := schemas.GetChatRequest()
-		defer schemas.ReleaseChatRequest(req)
+		req := schema.GetChatRequest()
+		defer schema.ReleaseChatRequest(req)
 
 		err := c.BodyParser(&req)
 		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(schemas.NewPayloadParseErr(err))
+			return c.Status(fiber.StatusBadRequest).JSON(schema.NewPayloadParseErr(err))
 		}
 
 		// Get router ID from path
@@ -52,18 +51,18 @@ func LangChatHandler(routerManager *router.Manager) Handler {
 
 		r, err := routerManager.GetLangRouter(routerID)
 		if err != nil {
-			httpErr := schemas.FromErr(err)
+			httpErr := schema.FromErr(err)
 
 			return c.Status(httpErr.Status).JSON(httpErr)
 		}
 
 		// Chat with router
-		resp := schemas.GetChatResponse()
-		defer schemas.ReleaseChatResponse(resp)
+		resp := schema.GetChatResponse()
+		defer schema.ReleaseChatResponse(resp)
 
 		resp, err = r.Chat(c.Context(), req)
 		if err != nil {
-			httpErr := schemas.FromErr(err)
+			httpErr := schema.FromErr(err)
 
 			return c.Status(httpErr.Status).JSON(httpErr)
 		}
@@ -80,7 +79,7 @@ func LangStreamRouterValidator(routerManager *router.Manager) Handler {
 
 			_, err := routerManager.GetLangRouter(routerID)
 			if err != nil {
-				httpErr := schemas.FromErr(err)
+				httpErr := schema.FromErr(err)
 
 				return c.Status(httpErr.Status).JSON(httpErr)
 			}
@@ -119,7 +118,7 @@ func LangStreamChatHandler(tel *telemetry.Telemetry, routerManager *router.Manag
 			wg  sync.WaitGroup
 		)
 
-		chatStreamC := make(chan *schemas.ChatStreamMessage)
+		chatStreamC := make(chan *schema.ChatStreamMessage)
 
 		r, _ := routerManager.GetLangRouter(routerID)
 
@@ -139,7 +138,7 @@ func LangStreamChatHandler(tel *telemetry.Telemetry, routerManager *router.Manag
 		}()
 
 		for {
-			var chatRequest schemas.ChatStreamRequest
+			var chatRequest schema.ChatStreamRequest
 
 			if err = c.ReadJSON(&chatRequest); err != nil {
 				// TODO: handle bad request schemas gracefully and return back validation errors
@@ -155,7 +154,7 @@ func LangStreamChatHandler(tel *telemetry.Telemetry, routerManager *router.Manag
 			// TODO: handle termination gracefully
 			wg.Add(1)
 
-			go func(chatRequest schemas.ChatStreamRequest) {
+			go func(chatRequest schema.ChatStreamRequest) {
 				defer wg.Done()
 
 				r.ChatStream(context.Background(), &chatRequest, chatStreamC)
@@ -185,7 +184,7 @@ func LangRoutersHandler(routerManager *router.Manager) Handler {
 			cfgs = append(cfgs, r.Config)
 		}
 
-		return c.Status(fiber.StatusOK).JSON(schemas.RouterListSchema{Routers: cfgs})
+		return c.Status(fiber.StatusOK).JSON(schema.RouterListSchema{Routers: cfgs})
 	}
 }
 
@@ -200,9 +199,9 @@ func LangRoutersHandler(routerManager *router.Manager) Handler {
 //	@Success	200	{object}	schemas.HealthSchema
 //	@Router		/v1/health/ [get]
 func HealthHandler(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusOK).JSON(schemas.HealthSchema{Healthy: true})
+	return c.Status(fiber.StatusOK).JSON(schema.HealthSchema{Healthy: true})
 }
 
 func NotFoundHandler(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusNotFound).JSON(schemas.ErrRouteNotFound)
+	return c.Status(fiber.StatusNotFound).JSON(schema.ErrRouteNotFound)
 }

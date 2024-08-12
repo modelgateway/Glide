@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/EinStack/glide/pkg/clients"
+	"github.com/EinStack/glide/pkg/api/schema"
 
-	"github.com/EinStack/glide/pkg/api/schemas"
+	"github.com/EinStack/glide/pkg/clients"
 
 	"github.com/EinStack/glide/pkg/telemetry"
 
@@ -55,7 +55,7 @@ func TestOctoMLClient_ChatRequest(t *testing.T) {
 	client, err := NewClient(providerCfg, clientCfg, telemetry.NewTelemetryMock())
 	require.NoError(t, err)
 
-	chatParams := schemas.ChatParams{Messages: []schemas.ChatMessage{{
+	chatParams := schema.ChatParams{Messages: []schema.ChatMessage{{
 		Role:    "human",
 		Content: "What's the biggest animal?",
 	}}}
@@ -88,7 +88,7 @@ func TestOctoMLClient_Chat_Error(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a chat request
-	chatParams := schemas.ChatParams{Messages: []schemas.ChatMessage{{
+	chatParams := schema.ChatParams{Messages: []schema.ChatMessage{{
 		Role:    "human",
 		Content: "What's the biggest animal?",
 	}}}
@@ -120,7 +120,7 @@ func TestDoChatRequest_ErrorResponse(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a chat request payload
-	chatParams := schemas.ChatParams{Messages: []schemas.ChatMessage{{
+	chatParams := schema.ChatParams{Messages: []schema.ChatMessage{{
 		Role:    "user",
 		Content: "What's the dealeo?",
 	}}}

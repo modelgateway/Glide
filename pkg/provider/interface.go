@@ -4,7 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/EinStack/glide/pkg/api/schemas"
+	"github.com/EinStack/glide/pkg/api/schema"
+
 	"github.com/EinStack/glide/pkg/clients"
 )
 
@@ -22,13 +23,13 @@ type ModelProvider interface {
 type LangProvider interface {
 	ModelProvider
 	SupportChatStream() bool
-	Chat(ctx context.Context, params *schemas.ChatParams) (*schemas.ChatResponse, error)
-	ChatStream(ctx context.Context, params *schemas.ChatParams) (clients.ChatStream, error)
+	Chat(ctx context.Context, params *schema.ChatParams) (*schema.ChatResponse, error)
+	ChatStream(ctx context.Context, params *schema.ChatParams) (clients.ChatStream, error)
 }
 
 // EmbeddingProvider defines an interface a provider should fulfill to be able to generate embeddings
 type EmbeddingProvider interface {
 	ModelProvider
 	SupportEmbedding() bool
-	Embed(ctx context.Context, params *schemas.ChatParams) (*schemas.ChatResponse, error)
+	Embed(ctx context.Context, params *schema.ChatParams) (*schema.ChatResponse, error)
 }

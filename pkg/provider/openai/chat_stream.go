@@ -8,12 +8,12 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/EinStack/glide/pkg/api/schema"
+
 	"github.com/EinStack/glide/pkg/clients"
 
 	"github.com/r3labs/sse/v2"
 	"go.uber.org/zap"
-
-	"github.com/EinStack/glide/pkg/api/schemas"
 )
 
 var StreamDoneMarker = []byte("[DONE]")
@@ -66,7 +66,7 @@ func (s *ChatStream) Open() error {
 	return nil
 }
 
-func (s *ChatStream) Recv() (*schemas.ChatStreamChunk, error) {
+func (s *ChatStream) Recv() (*schema.ChatStreamChunk, error) {
 	var completionChunk ChatCompletionChunk
 
 	for {
@@ -115,17 +115,17 @@ func (s *ChatStream) Recv() (*schemas.ChatStreamChunk, error) {
 		responseChunk := completionChunk.Choices[0]
 
 		// TODO: use objectpool here
-		return &schemas.ChatStreamChunk{
+		return &schema.ChatStreamChunk{
 			Cached:    false,
 			Provider:  ProviderID,
 			ModelName: completionChunk.ModelName,
-			ModelResponse: schemas.ModelChunkResponse{
-				Metadata: &schemas.Metadata{
+			ModelResponse: schema.ModelChunkResponse{
+				Metadata: &schema.Metadata{
 					"response_id":        completionChunk.ID,
 					"system_fingerprint": completionChunk.SystemFingerprint,
 					"generated_at":       completionChunk.Created,
 				},
-				Message: schemas.ChatMessage{
+				Message: schema.ChatMessage{
 					Role:    "assistant", // doesn't present in all chunks
 					Content: responseChunk.Delta.Content,
 				},
@@ -147,7 +147,7 @@ func (c *Client) SupportChatStream() bool {
 	return true
 }
 
-func (c *Client) ChatStream(ctx context.Context, params *schemas.ChatParams) (clients.ChatStream, error) {
+func (c *Client) ChatStream(ctx context.Context, params *schema.ChatParams) (clients.ChatStream, error) {
 	// Create a new chat request
 	httpRequest, err := c.makeStreamReq(ctx, params)
 	if err != nil {
@@ -163,7 +163,7 @@ func (c *Client) ChatStream(ctx context.Context, params *schemas.ChatParams) (cl
 	), nil
 }
 
-func (c *Client) makeStreamReq(ctx context.Context, params *schemas.ChatParams) (*http.Request, error) {
+func (c *Client) makeStreamReq(ctx context.Context, params *schema.ChatParams) (*http.Request, error) {
 	// TODO: consider using objectpool to optimize memory allocation
 	chatReq := *c.chatRequestTemplate // hoping to get a copy of the template
 	chatReq.ApplyParams(params)
