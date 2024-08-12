@@ -1,4 +1,4 @@
-package routers
+package router
 
 import (
 	"context"
@@ -8,17 +8,17 @@ import (
 
 	"github.com/EinStack/glide/pkg/api/schemas"
 	"github.com/EinStack/glide/pkg/resiliency/retry"
-	"github.com/EinStack/glide/pkg/routers/routing"
+	"github.com/EinStack/glide/pkg/router/routing"
 	"github.com/EinStack/glide/pkg/telemetry"
 	"go.uber.org/zap"
 )
 
 var ErrNoModels = errors.New("no models configured for router")
 
-type RouterID = string
+type ID = string
 
 type LangRouter struct {
-	routerID          RouterID
+	routerID          ID
 	Config            *LangRouterConfig
 	chatModels        []*extmodel.LanguageModel
 	chatStreamModels  []*extmodel.LanguageModel
@@ -55,7 +55,7 @@ func NewLangRouter(cfg *LangRouterConfig, tel *telemetry.Telemetry) (*LangRouter
 	return router, err
 }
 
-func (r *LangRouter) ID() RouterID {
+func (r *LangRouter) ID() ID {
 	return r.routerID
 }
 

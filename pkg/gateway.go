@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/EinStack/glide/pkg/routers"
+	"github.com/EinStack/glide/pkg/router"
 
 	"github.com/EinStack/glide/pkg/version"
 	"go.opentelemetry.io/contrib/instrumentation/host"
@@ -50,7 +50,7 @@ func NewGateway(configProvider *config.Provider) (*Gateway, error) {
 	tel.L().Info("🐦Glide is starting up", zap.String("version", version.FullVersion))
 	tel.L().Debug("✅ Config loaded successfully:\n" + configProvider.GetStr())
 
-	routerManager, err := routers.NewManager(&cfg.Routers, tel)
+	routerManager, err := router.NewManager(&cfg.Routers, tel)
 	if err != nil {
 		return nil, err
 	}

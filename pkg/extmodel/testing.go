@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/EinStack/glide/pkg/config/fields"
-	"github.com/EinStack/glide/pkg/routers/latency"
+	"github.com/EinStack/glide/pkg/router/latency"
 )
 
 // LangModelMock

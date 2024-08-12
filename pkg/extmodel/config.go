@@ -7,7 +7,7 @@ import (
 
 	"github.com/EinStack/glide/pkg/clients"
 	"github.com/EinStack/glide/pkg/resiliency/health"
-	"github.com/EinStack/glide/pkg/routers/latency"
+	"github.com/EinStack/glide/pkg/router/latency"
 	"github.com/EinStack/glide/pkg/telemetry"
 )
 

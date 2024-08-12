@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/EinStack/glide/pkg/routers"
+	"github.com/EinStack/glide/pkg/router"
 
 	"go.uber.org/zap"
 
@@ -19,7 +19,7 @@ type ServerManager struct {
 	telemetry  *telemetry.Telemetry
 }
 
-func NewServerManager(cfg *Config, tel *telemetry.Telemetry, router *routers.RouterManager) (*ServerManager, error) {
+func NewServerManager(cfg *Config, tel *telemetry.Telemetry, router *router.Manager) (*ServerManager, error) {
 	httpServer, err := http.NewServer(cfg.HTTP, tel, router)
 	if err != nil {
 		return nil, err

@@ -1,4 +1,4 @@
-package routers
+package router
 
 import (
 	"context"
@@ -14,8 +14,8 @@ import (
 	"github.com/EinStack/glide/pkg/resiliency/retry"
 
 	"github.com/EinStack/glide/pkg/api/schemas"
-	"github.com/EinStack/glide/pkg/routers/latency"
-	"github.com/EinStack/glide/pkg/routers/routing"
+	"github.com/EinStack/glide/pkg/router/latency"
+	"github.com/EinStack/glide/pkg/router/routing"
 	"github.com/EinStack/glide/pkg/telemetry"
 	"github.com/stretchr/testify/require"
 )

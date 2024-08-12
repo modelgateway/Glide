@@ -1,4 +1,4 @@
-package routers
+package router
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/EinStack/glide/pkg/extmodel"
 
 	"github.com/EinStack/glide/pkg/resiliency/retry"
-	"github.com/EinStack/glide/pkg/routers/routing"
+	"github.com/EinStack/glide/pkg/router/routing"
 	"github.com/EinStack/glide/pkg/telemetry"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
@@ -22,21 +22,21 @@ type (
 
 // LangRouterConfig
 type LangRouterConfig struct {
-	RouterConfig
+	Config
 	Models LangModelPoolConfig `yaml:"models" json:"models" validate:"required,min=1,dive"` // the list of models that could handle requests
 }
 
-type RouterConfigOption = func(*LangRouterConfig)
+type ConfigOption = func(*LangRouterConfig)
 
-func WithModels(models LangModelPoolConfig) RouterConfigOption {
+func WithModels(models LangModelPoolConfig) ConfigOption {
 	return func(c *LangRouterConfig) {
 		c.Models = models
 	}
 }
 
-func NewRouterConfig(RouterID string, opt ...RouterConfigOption) *LangRouterConfig {
+func NewRouterConfig(RouterID string, opt ...ConfigOption) *LangRouterConfig {
 	cfg := &LangRouterConfig{
-		RouterConfig: DefaultConfig(),
+		Config: DefaultConfig(),
 	}
 
 	cfg.ID = RouterID
@@ -190,7 +190,7 @@ func (c *LangRouterConfig) BuildRouting(
 
 func DefaultRouterConfig() *LangRouterConfig {
 	return &LangRouterConfig{
-		RouterConfig: DefaultConfig(),
+		Config: DefaultConfig(),
 	}
 }
 

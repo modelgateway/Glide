@@ -1,4 +1,4 @@
-package routers
+package router
 
 type EmbeddingRouter struct {
 	// routerID lang.RouterID

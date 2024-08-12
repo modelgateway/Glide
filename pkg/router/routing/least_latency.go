@@ -7,7 +7,7 @@ import (
 
 	"github.com/EinStack/glide/pkg/extmodel"
 
-	"github.com/EinStack/glide/pkg/routers/latency"
+	"github.com/EinStack/glide/pkg/router/latency"
 )
 
 const (

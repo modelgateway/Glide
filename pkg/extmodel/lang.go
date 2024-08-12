@@ -12,7 +12,7 @@ import (
 
 	"github.com/EinStack/glide/pkg/config/fields"
 
-	"github.com/EinStack/glide/pkg/routers/latency"
+	"github.com/EinStack/glide/pkg/router/latency"
 
 	"github.com/EinStack/glide/pkg/api/schemas"
 )

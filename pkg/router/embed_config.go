@@ -1,4 +1,4 @@
-package routers
+package router
 
 import (
 	"github.com/EinStack/glide/pkg/extmodel"
@@ -11,6 +11,6 @@ type (
 )
 
 type EmbeddingRouterConfig struct {
-	RouterConfig
+	Config
 	Models EmbedModelPoolConfig `yaml:"models" json:"models" validate:"required,min=1,dive"` // the list of models that could handle requests
 }

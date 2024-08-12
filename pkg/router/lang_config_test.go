@@ -1,4 +1,4 @@
-package routers
+package router
 
 import (
 	"testing"
@@ -9,8 +9,8 @@ import (
 	"github.com/EinStack/glide/pkg/provider/cohere"
 	"github.com/EinStack/glide/pkg/provider/openai"
 	"github.com/EinStack/glide/pkg/resiliency/health"
-	"github.com/EinStack/glide/pkg/routers/latency"
-	"github.com/EinStack/glide/pkg/routers/routing"
+	"github.com/EinStack/glide/pkg/router/latency"
+	"github.com/EinStack/glide/pkg/router/routing"
 	"github.com/EinStack/glide/pkg/telemetry"
 	"github.com/stretchr/testify/require"
 )
