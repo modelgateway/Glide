@@ -25,6 +25,6 @@ func DefaultConfig() Config {
 
 // RoutersConfig defines a config for a set of supported router types
 type RoutersConfig struct {
-	LanguageRouters LangRoutersConfig `yaml:"language" validate:"required,dive"` // the list of language routers
-	// EmbeddingRouters []EmbeddingRouterConfig `yaml:"embedding" validate:"required,dive"`
+	LanguageRouters  LangRoutersConfig  `yaml:"language" validate:"required,dive"` // the list of language routers
+	EmbeddingRouters EmbedRoutersConfig `yaml:"embedding" validate:"required,dive"`
 }
