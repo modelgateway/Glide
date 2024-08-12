@@ -122,6 +122,11 @@ type Mock struct {
 	modelName        *string
 }
 
+// ensure interfaces
+var (
+	_ LangProvider = (*Mock)(nil)
+)
+
 func NewMock(modelName *string, responses []RespMock) *Mock {
 	return &Mock{
 		idx:              0,

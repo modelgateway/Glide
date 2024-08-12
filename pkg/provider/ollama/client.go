@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/EinStack/glide/pkg/provider"
+
 	"github.com/EinStack/glide/pkg/clients"
 
 	"github.com/EinStack/glide/pkg/telemetry"
@@ -23,6 +25,11 @@ type Client struct {
 	httpClient          *http.Client
 	telemetry           *telemetry.Telemetry
 }
+
+// ensure interfaces
+var (
+	_ provider.LangProvider = (*Client)(nil)
+)
 
 // NewClient creates a new OpenAI client for the OpenAI API.
 func NewClient(providerConfig *Config, clientConfig *clients.ClientConfig, tel *telemetry.Telemetry) (*Client, error) {

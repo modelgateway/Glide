@@ -1,4 +1,4 @@
-package lang
+package routers
 
 import (
 	"context"
@@ -46,7 +46,7 @@ func TestLangRouter_Chat_PickFistHealthy(t *testing.T) {
 		modelPool = append(modelPool, model)
 	}
 
-	router := Router{
+	router := LangRouter{
 		routerID:         "test_router",
 		retry:            retry.NewExpRetry(3, 2, 1*time.Second, nil),
 		chatRouting:      routing.NewPriority(modelPool),
@@ -101,7 +101,7 @@ func TestLangRouter_Chat_PickThirdHealthy(t *testing.T) {
 
 	expectedModels := []string{"third", "third"}
 
-	router := Router{
+	router := LangRouter{
 		routerID:          "test_router",
 		retry:             retry.NewExpRetry(3, 2, 1*time.Second, nil),
 		chatRouting:       routing.NewPriority(modelPool),
@@ -149,7 +149,7 @@ func TestLangRouter_Chat_SuccessOnRetry(t *testing.T) {
 		modelPool = append(modelPool, model)
 	}
 
-	router := Router{
+	router := LangRouter{
 		routerID:          "test_router",
 		retry:             retry.NewExpRetry(3, 2, 1*time.Millisecond, nil),
 		chatRouting:       routing.NewPriority(modelPool),
@@ -192,7 +192,7 @@ func TestLangRouter_Chat_UnhealthyModelInThePool(t *testing.T) {
 		modelPool = append(modelPool, model)
 	}
 
-	router := Router{
+	router := LangRouter{
 		routerID:          "test_router",
 		retry:             retry.NewExpRetry(3, 2, 1*time.Millisecond, nil),
 		chatRouting:       routing.NewPriority(modelPool),
@@ -237,7 +237,7 @@ func TestLangRouter_Chat_AllModelsUnavailable(t *testing.T) {
 		modelPool = append(modelPool, model)
 	}
 
-	router := Router{
+	router := LangRouter{
 		routerID:          "test_router",
 		retry:             retry.NewExpRetry(1, 2, 1*time.Millisecond, nil),
 		chatRouting:       routing.NewPriority(modelPool),
@@ -293,7 +293,7 @@ func TestLangRouter_ChatStream(t *testing.T) {
 		modelPool = append(modelPool, model)
 	}
 
-	router := Router{
+	router := LangRouter{
 		routerID:          "test_stream_router",
 		retry:             retry.NewExpRetry(3, 2, 1*time.Second, nil),
 		chatRouting:       routing.NewPriority(modelPool),
@@ -362,7 +362,7 @@ func TestLangRouter_ChatStream_FailOnFirst(t *testing.T) {
 		modelPool = append(modelPool, model)
 	}
 
-	router := Router{
+	router := LangRouter{
 		routerID:          "test_stream_router",
 		retry:             retry.NewExpRetry(3, 2, 1*time.Second, nil),
 		chatRouting:       routing.NewPriority(modelPool),
@@ -431,7 +431,7 @@ func TestLangRouter_ChatStream_AllModelsUnavailable(t *testing.T) {
 		modelPool = append(modelPool, model)
 	}
 
-	router := Router{
+	router := LangRouter{
 		routerID:          "test_router",
 		retry:             retry.NewExpRetry(1, 2, 1*time.Millisecond, nil),
 		chatRouting:       routing.NewPriority(modelPool),

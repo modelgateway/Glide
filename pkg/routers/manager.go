@@ -1,26 +1,25 @@
-package manager
+package routers
 
 import (
 	"github.com/EinStack/glide/pkg/api/schemas"
-	"github.com/EinStack/glide/pkg/routers/lang"
 	"github.com/EinStack/glide/pkg/telemetry"
 )
 
 type RouterManager struct {
-	Config        *Config
+	Config        *RoutersConfig
 	tel           *telemetry.Telemetry
-	langRouterMap *map[string]*lang.Router
-	langRouters   []*lang.Router
+	langRouterMap *map[string]*LangRouter
+	langRouters   []*LangRouter
 }
 
 // NewManager creates a new instance of Router Manager that creates, holds and returns all routers
-func NewManager(cfg *Config, tel *telemetry.Telemetry) (*RouterManager, error) {
+func NewManager(cfg *RoutersConfig, tel *telemetry.Telemetry) (*RouterManager, error) {
 	langRouters, err := cfg.LanguageRouters.Build(tel)
 	if err != nil {
 		return nil, err
 	}
 
-	langRouterMap := make(map[string]*lang.Router, len(langRouters))
+	langRouterMap := make(map[string]*LangRouter, len(langRouters))
 
 	for _, router := range langRouters {
 		langRouterMap[router.ID()] = router
@@ -36,12 +35,12 @@ func NewManager(cfg *Config, tel *telemetry.Telemetry) (*RouterManager, error) {
 	return &manager, err
 }
 
-func (r *RouterManager) GetLangRouters() []*lang.Router {
+func (r *RouterManager) GetLangRouters() []*LangRouter {
 	return r.langRouters
 }
 
 // GetLangRouter returns a router by type and ID
-func (r *RouterManager) GetLangRouter(routerID string) (*lang.Router, error) {
+func (r *RouterManager) GetLangRouter(routerID string) (*LangRouter, error) {
 	if router, found := (*r.langRouterMap)[routerID]; found {
 		return router, nil
 	}

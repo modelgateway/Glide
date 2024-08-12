@@ -22,3 +22,10 @@ func DefaultConfig() RouterConfig {
 		Retry:           retry.DefaultExpRetryConfig(),
 	}
 }
+
+// RoutersConfig defines a config for a set of supported router types
+// TODO: remove nolint after renaming the package
+type RoutersConfig struct { //nolint: revive
+	LanguageRouters LangRoutersConfig `yaml:"language" validate:"required,dive"` // the list of language routers
+	// EmbeddingRouters []EmbeddingRouterConfig `yaml:"embedding" validate:"required,dive"`
+}

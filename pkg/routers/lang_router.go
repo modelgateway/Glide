@@ -1,4 +1,4 @@
-package lang
+package routers
 
 import (
 	"context"
@@ -17,9 +17,9 @@ var ErrNoModels = errors.New("no models configured for router")
 
 type RouterID = string
 
-type Router struct {
+type LangRouter struct {
 	routerID          RouterID
-	Config            *RouterConfig
+	Config            *LangRouterConfig
 	chatModels        []*extmodel.LanguageModel
 	chatStreamModels  []*extmodel.LanguageModel
 	chatRouting       routing.LangModelRouting
@@ -29,7 +29,7 @@ type Router struct {
 	logger            *zap.Logger
 }
 
-func NewLangRouter(cfg *RouterConfig, tel *telemetry.Telemetry) (*Router, error) {
+func NewLangRouter(cfg *LangRouterConfig, tel *telemetry.Telemetry) (*LangRouter, error) {
 	chatModels, chatStreamModels, err := cfg.BuildModels(tel)
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func NewLangRouter(cfg *RouterConfig, tel *telemetry.Telemetry) (*Router, error)
 		return nil, err
 	}
 
-	router := &Router{
+	router := &LangRouter{
 		routerID:          cfg.ID,
 		Config:            cfg,
 		chatModels:        chatModels,
@@ -55,11 +55,11 @@ func NewLangRouter(cfg *RouterConfig, tel *telemetry.Telemetry) (*Router, error)
 	return router, err
 }
 
-func (r *Router) ID() RouterID {
+func (r *LangRouter) ID() RouterID {
 	return r.routerID
 }
 
-func (r *Router) Chat(ctx context.Context, req *schemas.ChatRequest) (*schemas.ChatResponse, error) {
+func (r *LangRouter) Chat(ctx context.Context, req *schemas.ChatRequest) (*schemas.ChatResponse, error) {
 	if len(r.chatModels) == 0 {
 		return nil, ErrNoModels
 	}
@@ -115,7 +115,7 @@ func (r *Router) Chat(ctx context.Context, req *schemas.ChatRequest) (*schemas.C
 	return nil, &schemas.ErrNoModelAvailable
 }
 
-func (r *Router) ChatStream(
+func (r *LangRouter) ChatStream(
 	ctx context.Context,
 	req *schemas.ChatStreamRequest,
 	respC chan<- *schemas.ChatStreamMessage,

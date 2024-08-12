@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/EinStack/glide/pkg/routers/manager"
+	"github.com/EinStack/glide/pkg/routers"
 
 	"github.com/gofiber/contrib/otelfiber"
 
@@ -25,11 +25,11 @@ import (
 type Server struct {
 	config        *ServerConfig
 	telemetry     *telemetry.Telemetry
-	routerManager *manager.RouterManager
+	routerManager *routers.RouterManager
 	server        *fiber.App
 }
 
-func NewServer(config *ServerConfig, tel *telemetry.Telemetry, routerManager *manager.RouterManager) (*Server, error) {
+func NewServer(config *ServerConfig, tel *telemetry.Telemetry, routerManager *routers.RouterManager) (*Server, error) {
 	srv := config.ToServer()
 
 	return &Server{

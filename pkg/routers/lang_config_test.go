@@ -1,4 +1,4 @@
-package lang
+package routers
 
 import (
 	"testing"
@@ -18,10 +18,10 @@ import (
 func TestRouterConfig_BuildModels(t *testing.T) {
 	defaultParams := openai.DefaultParams()
 
-	cfg := RoutersConfig{
+	cfg := LangRoutersConfig{
 		*NewRouterConfig(
 			"first_router",
-			WithModels(ModelPoolConfig{
+			WithModels(LangModelPoolConfig{
 				{
 					ID:          "first_model",
 					Enabled:     true,
@@ -39,7 +39,7 @@ func TestRouterConfig_BuildModels(t *testing.T) {
 		),
 		*NewRouterConfig(
 			"second_router",
-			WithModels(ModelPoolConfig{
+			WithModels(LangModelPoolConfig{
 				{
 					ID:          "first_model",
 					Enabled:     true,
@@ -74,7 +74,7 @@ func TestRouterConfig_BuildModelsPerType(t *testing.T) {
 
 	cfg := NewRouterConfig(
 		"first_router",
-		WithModels(ModelPoolConfig{
+		WithModels(LangModelPoolConfig{
 			{
 				ID:          "first_model",
 				Enabled:     true,
@@ -116,14 +116,14 @@ func TestRouterConfig_InvalidSetups(t *testing.T) {
 
 	tests := []struct {
 		name   string
-		config RoutersConfig
+		config LangRoutersConfig
 	}{
 		{
 			"duplicated router IDs",
-			RoutersConfig{
+			LangRoutersConfig{
 				*NewRouterConfig(
 					"first_router",
-					WithModels(ModelPoolConfig{
+					WithModels(LangModelPoolConfig{
 						{
 							ID:          "first_model",
 							Enabled:     true,
@@ -141,7 +141,7 @@ func TestRouterConfig_InvalidSetups(t *testing.T) {
 				),
 				*NewRouterConfig(
 					"first_router",
-					WithModels(ModelPoolConfig{
+					WithModels(LangModelPoolConfig{
 						{
 							ID:          "first_model",
 							Enabled:     true,
@@ -161,10 +161,10 @@ func TestRouterConfig_InvalidSetups(t *testing.T) {
 		},
 		{
 			"duplicated model IDs",
-			RoutersConfig{
+			LangRoutersConfig{
 				*NewRouterConfig(
 					"first_router",
-					WithModels(ModelPoolConfig{
+					WithModels(LangModelPoolConfig{
 						{
 							ID:          "first_model",
 							Enabled:     true,
@@ -197,10 +197,10 @@ func TestRouterConfig_InvalidSetups(t *testing.T) {
 		},
 		{
 			"no models",
-			RoutersConfig{
+			LangRoutersConfig{
 				*NewRouterConfig(
 					"first_router",
-					WithModels(ModelPoolConfig{}),
+					WithModels(LangModelPoolConfig{}),
 				),
 			},
 		},

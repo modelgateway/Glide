@@ -1,4 +1,4 @@
-package lang
+package routers
 
 import (
 	"fmt"
@@ -8,8 +8,6 @@ import (
 
 	"github.com/EinStack/glide/pkg/extmodel"
 
-	"github.com/EinStack/glide/pkg/routers"
-
 	"github.com/EinStack/glide/pkg/resiliency/retry"
 	"github.com/EinStack/glide/pkg/routers/routing"
 	"github.com/EinStack/glide/pkg/telemetry"
@@ -18,40 +16,40 @@ import (
 )
 
 type (
-	ModelConfig     = extmodel.Config[*provider.Config]
-	ModelPoolConfig = []ModelConfig
+	LangModelConfig     = extmodel.Config[*provider.Config]
+	LangModelPoolConfig = []LangModelConfig
 )
 
-// RouterConfig
-type RouterConfig struct {
-	routers.RouterConfig
-	Models ModelPoolConfig `yaml:"models" json:"models" validate:"required,min=1,dive"` // the list of models that could handle requests
+// LangRouterConfig
+type LangRouterConfig struct {
+	RouterConfig
+	Models LangModelPoolConfig `yaml:"models" json:"models" validate:"required,min=1,dive"` // the list of models that could handle requests
 }
 
-type RouterConfigOption = func(*RouterConfig)
+type RouterConfigOption = func(*LangRouterConfig)
 
-func WithModels(models ModelPoolConfig) RouterConfigOption {
-	return func(c *RouterConfig) {
+func WithModels(models LangModelPoolConfig) RouterConfigOption {
+	return func(c *LangRouterConfig) {
 		c.Models = models
 	}
 }
 
-func NewRouterConfig(RouterID string, opt ...RouterConfigOption) *RouterConfig {
-	config := &RouterConfig{
-		RouterConfig: routers.DefaultConfig(),
+func NewRouterConfig(RouterID string, opt ...RouterConfigOption) *LangRouterConfig {
+	cfg := &LangRouterConfig{
+		RouterConfig: DefaultConfig(),
 	}
 
-	config.ID = RouterID
+	cfg.ID = RouterID
 
 	for _, o := range opt {
-		o(config)
+		o(cfg)
 	}
 
-	return config
+	return cfg
 }
 
 // BuildModels creates LanguageModel slice out of the given config
-func (c *RouterConfig) BuildModels(tel *telemetry.Telemetry) ([]*extmodel.LanguageModel, []*extmodel.LanguageModel, error) { //nolint: cyclop
+func (c *LangRouterConfig) BuildModels(tel *telemetry.Telemetry) ([]*extmodel.LanguageModel, []*extmodel.LanguageModel, error) { //nolint: cyclop
 	var errs error
 
 	seenIDs := make(map[string]bool, len(c.Models))
@@ -147,7 +145,7 @@ func (c *RouterConfig) BuildModels(tel *telemetry.Telemetry) ([]*extmodel.Langua
 	return chatModels, chatStreamModels, nil
 }
 
-func (c *RouterConfig) BuildRetry() *retry.ExpRetry {
+func (c *LangRouterConfig) BuildRetry() *retry.ExpRetry {
 	retryConfig := c.Retry
 	maxDelay := time.Duration(*retryConfig.MaxDelay)
 
@@ -159,7 +157,7 @@ func (c *RouterConfig) BuildRetry() *retry.ExpRetry {
 	)
 }
 
-func (c *RouterConfig) BuildRouting(
+func (c *LangRouterConfig) BuildRouting(
 	chatModels []*extmodel.LanguageModel,
 	chatStreamModels []*extmodel.LanguageModel,
 ) (routing.LangModelRouting, routing.LangModelRouting, error) {
@@ -190,25 +188,25 @@ func (c *RouterConfig) BuildRouting(
 	return nil, nil, fmt.Errorf("routing strategy \"%v\" is not supported, please make sure there is no typo", c.RoutingStrategy)
 }
 
-func DefaultRouterConfig() *RouterConfig {
-	return &RouterConfig{
-		RouterConfig: routers.DefaultConfig(),
+func DefaultRouterConfig() *LangRouterConfig {
+	return &LangRouterConfig{
+		RouterConfig: DefaultConfig(),
 	}
 }
 
-func (c *RouterConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	*c = *DefaultRouterConfig()
+func (c LangRouterConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	c = *DefaultRouterConfig()
 
-	type plain RouterConfig // to avoid recursion
+	type plain LangRouterConfig // to avoid recursion
 
-	return unmarshal((*plain)(c))
+	return unmarshal((plain)(c))
 }
 
-type RoutersConfig []RouterConfig
+type LangRoutersConfig []LangRouterConfig
 
-func (c RoutersConfig) Build(tel *telemetry.Telemetry) ([]*Router, error) {
+func (c LangRoutersConfig) Build(tel *telemetry.Telemetry) ([]*LangRouter, error) {
 	seenIDs := make(map[string]bool, len(c))
-	langRouters := make([]*Router, 0, len(c))
+	langRouters := make([]*LangRouter, 0, len(c))
 
 	var errs error
 
