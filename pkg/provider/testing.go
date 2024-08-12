@@ -68,6 +68,11 @@ type RespStreamMock struct {
 	Chunks  *[]RespMock
 }
 
+// ensure interface
+var (
+	_ clients.ChatStream = (*RespStreamMock)(nil)
+)
+
 func NewRespStreamMock(chunk *[]RespMock) RespStreamMock {
 	return RespStreamMock{
 		idx:     0,

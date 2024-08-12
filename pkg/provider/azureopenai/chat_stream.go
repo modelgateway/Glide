@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	clients2 "github.com/EinStack/glide/pkg/clients"
+	"github.com/EinStack/glide/pkg/clients"
 
 	"github.com/EinStack/glide/pkg/telemetry"
 
@@ -33,6 +33,11 @@ type ChatStream struct {
 	finishReasonMapper *openai.FinishReasonMapper
 	errMapper          *ErrorMapper
 }
+
+// ensure interface
+var (
+	_ clients.ChatStream = (*ChatStream)(nil)
+)
 
 func NewChatStream(
 	tel *telemetry.Telemetry,
@@ -83,7 +88,7 @@ func (s *ChatStream) Recv() (*schemas.ChatStreamChunk, error) {
 			// if err is io.EOF, this still means that the stream is interrupted unexpectedly
 			//  because the normal stream termination is done via finding out streamDoneMarker
 
-			return nil, clients2.ErrProviderUnavailable
+			return nil, clients.ErrProviderUnavailable
 		}
 
 		s.tel.L().Debug(
@@ -92,7 +97,7 @@ func (s *ChatStream) Recv() (*schemas.ChatStreamChunk, error) {
 			zap.ByteString("rawChunk", rawEvent),
 		)
 
-		event, err := clients2.ParseSSEvent(rawEvent)
+		event, err := clients.ParseSSEvent(rawEvent)
 
 		if bytes.Equal(event.Data, openai.StreamDoneMarker) {
 			s.tel.L().Info(
@@ -156,7 +161,7 @@ func (c *Client) SupportChatStream() bool {
 	return true
 }
 
-func (c *Client) ChatStream(ctx context.Context, params *schemas.ChatParams) (clients2.ChatStream, error) {
+func (c *Client) ChatStream(ctx context.Context, params *schemas.ChatParams) (clients.ChatStream, error) {
 	// Create a new chat request
 	httpRequest, err := c.makeStreamReq(ctx, params)
 	if err != nil {

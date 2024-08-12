@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	clients2 "github.com/EinStack/glide/pkg/clients"
+	"github.com/EinStack/glide/pkg/clients"
 
 	"github.com/EinStack/glide/pkg/telemetry"
 
@@ -40,6 +40,11 @@ type ChatStream struct {
 	finishReasonMapper *FinishReasonMapper
 	tel                *telemetry.Telemetry
 }
+
+// ensure interface
+var (
+	_ clients.ChatStream = (*ChatStream)(nil)
+)
 
 func NewChatStream(
 	tel *telemetry.Telemetry,
@@ -96,7 +101,7 @@ func (s *ChatStream) Recv() (*schemas.ChatStreamChunk, error) {
 
 			// if io.EOF occurred in the middle of the stream, then the stream was interrupted
 
-			return nil, clients2.ErrProviderUnavailable
+			return nil, clients.ErrProviderUnavailable
 		}
 
 		s.tel.L().Debug(
@@ -178,7 +183,7 @@ func (c *Client) SupportChatStream() bool {
 	return true
 }
 
-func (c *Client) ChatStream(ctx context.Context, params *schemas.ChatParams) (clients2.ChatStream, error) {
+func (c *Client) ChatStream(ctx context.Context, params *schemas.ChatParams) (clients.ChatStream, error) {
 	// Create a new chat request
 	httpRequest, err := c.makeStreamReq(ctx, params)
 	if err != nil {
