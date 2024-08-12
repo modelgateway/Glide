@@ -50,7 +50,7 @@ func LangChatHandler(routerManager *router.Manager) Handler {
 		// Get router ID from path
 		routerID := c.Params("router")
 
-		router, err := routerManager.GetLangRouter(routerID)
+		r, err := routerManager.GetLangRouter(routerID)
 		if err != nil {
 			httpErr := schemas.FromErr(err)
 
@@ -61,7 +61,7 @@ func LangChatHandler(routerManager *router.Manager) Handler {
 		resp := schemas.GetChatResponse()
 		defer schemas.ReleaseChatResponse(resp)
 
-		resp, err = router.Chat(c.Context(), req)
+		resp, err = r.Chat(c.Context(), req)
 		if err != nil {
 			httpErr := schemas.FromErr(err)
 
@@ -121,7 +121,7 @@ func LangStreamChatHandler(tel *telemetry.Telemetry, routerManager *router.Manag
 
 		chatStreamC := make(chan *schemas.ChatStreamMessage)
 
-		router, _ := routerManager.GetLangRouter(routerID)
+		r, _ := routerManager.GetLangRouter(routerID)
 
 		defer close(chatStreamC)
 		defer c.Conn.Close()
@@ -158,7 +158,7 @@ func LangStreamChatHandler(tel *telemetry.Telemetry, routerManager *router.Manag
 			go func(chatRequest schemas.ChatStreamRequest) {
 				defer wg.Done()
 
-				router.ChatStream(context.Background(), &chatRequest, chatStreamC)
+				r.ChatStream(context.Background(), &chatRequest, chatStreamC)
 			}(chatRequest)
 		}
 
@@ -181,8 +181,8 @@ func LangRoutersHandler(routerManager *router.Manager) Handler {
 		configuredRouters := routerManager.GetLangRouters()
 		cfgs := make([]interface{}, 0, len(configuredRouters)) // opaque by design
 
-		for _, router := range configuredRouters {
-			cfgs = append(cfgs, router.Config)
+		for _, r := range configuredRouters {
+			cfgs = append(cfgs, r.Config)
 		}
 
 		return c.Status(fiber.StatusOK).JSON(schemas.RouterListSchema{Routers: cfgs})

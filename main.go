@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/EinStack/glide/pkg/cmd"
+	"github.com/EinStack/glide/cmd"
 )
 
 //	@title			Glide
