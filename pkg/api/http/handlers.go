@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"github.com/EinStack/glide/pkg/api/schema"
+
 	"github.com/EinStack/glide/pkg/router"
 
 	"github.com/EinStack/glide/pkg/telemetry"
